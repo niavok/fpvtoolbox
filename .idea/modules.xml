@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file:///mnt/workspace/fred/AndroidStudioProjects/FPVToolbox/FPVToolbox.iml" filepath="/mnt/workspace/fred/AndroidStudioProjects/FPVToolbox/FPVToolbox.iml" />
+      <module fileurl="file:///mnt/workspace/fred/AndroidStudioProjects/FPVToolbox/app/app.iml" filepath="/mnt/workspace/fred/AndroidStudioProjects/FPVToolbox/app/app.iml" />
+    </modules>
+  </component>
+</project>
