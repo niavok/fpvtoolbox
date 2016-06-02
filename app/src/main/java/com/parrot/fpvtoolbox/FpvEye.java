@@ -35,6 +35,8 @@ public class FpvEye {
     private int mProgramEyeToSourceUVScale;
     private int mProgramEyeToSourceOffset;
     private int mProgramEyeToSourceScale;
+    private int mProgramChromaticAberrationCorrection;
+    private int mProgramLensLimits;
     private int mProgramPosition;
     private int mProgramColor;
     private int mProgramTexCoord0;
@@ -44,6 +46,7 @@ public class FpvEye {
     private float mEyeHeight = 10; // mm
     private float mEyeOffsetX = 0; // mm
     private float mEyeOffsetY = 0; // mm
+
 
     /*static int mockIndices[] = {
             0, 3, 1 ,
@@ -202,6 +205,18 @@ public class FpvEye {
             Log.e(TAG, "Fail to get uniform 'EyeToSourceOffset' location loading program");
         }
 
+        mProgramChromaticAberrationCorrection = GLES20.glGetUniformLocation(mProgram, "ChromaticAberrationCorrection");
+        if(mProgramChromaticAberrationCorrection < 0)
+        {
+            Log.e(TAG, "Fail to get uniform 'ChromaticAberrationCorrection' location loading program");
+        }
+
+        mProgramLensLimits = GLES20.glGetUniformLocation(mProgram, "LensLimits");
+        if(mProgramLensLimits < 0)
+        {
+            Log.e(TAG, "Fail to get uniform 'ChromaticAberrationCorrection' location loading program");
+        }
+
         mProgramPosition = GLES20.glGetAttribLocation(mProgram, "Position");
         if(mProgramPosition < 0)
         {
@@ -267,8 +282,27 @@ public class FpvEye {
         GLES20.glVertexAttribPointer(mProgramTexCoord2, 2, GLES20.GL_FLOAT, false, 0, 0);
 
         //GLES20.glUniform2f(mProgramEyeToSourceUVScale, 2f, 2f);
-        GLES20.glUniform2f(mProgramEyeToSourceUVScale, 1.0f, 1.0f);
+        GLES20.glUniform2f(mProgramEyeToSourceUVScale, mRenderer.getViewScale(), mRenderer.getViewScale());
         GLES20.glUniform2f(mProgramEyeToSourceUVOffset, 0, 0);
+
+        if(mRenderer.isChromaticAberrationCorrection())
+        {
+            GLES20.glUniform1i(mProgramChromaticAberrationCorrection, 1);
+        }
+        else
+        {
+            GLES20.glUniform1i(mProgramChromaticAberrationCorrection, 0);
+        }
+
+        if(mRenderer.isShowLensLimits())
+        {
+            GLES20.glUniform1i(mProgramLensLimits, 1);
+        }
+        else
+        {
+            GLES20.glUniform1i(mProgramLensLimits, 0);
+        }
+
         GLES20.glUniform2f(mProgramEyeToSourceScale, 2.f / mRenderer.getMetricsWidth(), 2.f / mRenderer.getMetricsHeight());
         GLES20.glUniform2f(mProgramEyeToSourceOffset, 2.0f * mEyeOffsetX / mRenderer.getMetricsWidth(), 2.0f * mEyeOffsetY / mRenderer.getMetricsHeight());
 

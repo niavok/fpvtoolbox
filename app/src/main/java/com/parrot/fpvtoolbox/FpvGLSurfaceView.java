@@ -46,4 +46,16 @@ public class FpvGLSurfaceView extends GLSurfaceView {
     public FpvGLRenderer GetRenderer() {
         return mRenderer;
     }
+
+    public void setForceRedraw(boolean forceRedraw) {
+        mRenderer.setForceRedraw(forceRedraw);
+    }
+
+    public void setViewScale(float viewScale) {
+        mRenderer.setViewScale(1/viewScale);
+    }
+
+    public void setIpd(float ipd) {
+        mRenderer.setIpd(ipd);
+    }
 }

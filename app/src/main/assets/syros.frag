@@ -4,6 +4,7 @@
 
 //make sure to use samplerExternalOES instead of sampler2D
 uniform samplerExternalOES Texture0;    // The input texture.
+uniform int LensLimits;
 
 
 //uniform sampler2D Texture0;
@@ -18,7 +19,8 @@ void main()
     mediump float ResultR;
     if (oTexCoord0.x > 1.0 || oTexCoord0.y > 1.0 || oTexCoord0.x < 0.0 || oTexCoord0.y < 0.0)
     {
-         ResultR = 0.0;
+
+         ResultR = (LensLimits == 1 ? 0.1 : 0.0);
     }
     else
     {
@@ -28,7 +30,7 @@ void main()
     mediump float ResultG;
     if (oTexCoord1.x > 1.0 || oTexCoord1.y > 1.0 || oTexCoord1.x < 0.0 || oTexCoord1.y < 0.0)
     {
-         ResultG = 0.0;
+         ResultG = (LensLimits == 1 ? 0.2 : 0.0);
     }
     else
     {
@@ -38,7 +40,7 @@ void main()
     mediump float ResultB;
     if (oTexCoord2.x > 1.0 || oTexCoord2.y > 1.0 || oTexCoord2.x < 0.0 || oTexCoord2.y < 0.0)
     {
-         ResultB = 0.0;
+         ResultB = (LensLimits == 1 ? 0.3 : 0.0);
     }
     else
     {

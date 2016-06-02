@@ -1,42 +1,30 @@
 package com.parrot.fpvtoolbox;
 
-import android.content.Context;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
-import android.opengl.GLSurfaceView;
-import android.os.AsyncTask;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.PersistableBundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.util.Log;
-import android.view.View;
+import android.view.InputDevice;
+import android.view.KeyEvent;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.webkit.WebChromeClient;
-import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.TextView;
 
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Date;
+import java.util.ArrayList;
 
 public class FpvToolBox extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = "FpvToolBox";
+    private static final float DEFAULT_IPD = 63.0f;
+    private static final float DEFAULT_SCALE = 0.75f;
 
 
     private FpvGLSurfaceView mGLView;
@@ -47,8 +35,19 @@ public class FpvToolBox extends AppCompatActivity
     private WebView mWebView;
     private GLRelativeLayout mGLLinearLayout;
     boolean mIsFinished = false;
-    String mUrlString = "http://niavok.com/fpv/fpv.html";
+    ArrayList<String> mScenes;
+    ArrayList<String> mSceneNames;
     private long mLastDate = 0;
+    private boolean mChromaticAberrationCorrection = true;
+    private boolean mDistortionCorrection = true;
+    private boolean mLensLimits = false;
+    private int mCurrentSceneIndex = 1;
+    private TextView mNotificationTextView;
+    private Handler mNotificationHandler;
+    private float mViewScale = DEFAULT_SCALE;
+    private float mIpd = DEFAULT_IPD;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,10 +74,23 @@ public class FpvToolBox extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        mScenes = new ArrayList<String>();
+        mScenes.add("http://niavok.com/fpv/grid.html");
+        mScenes.add("http://niavok.com/fpv/lotr.html");
+        mScenes.add("http://niavok.com/fpv/parrot.html");
+        mScenes.add("http://niavok.com/fpv/ssme.html");
+
+        mSceneNames = new ArrayList<String>();
+        mSceneNames.add("Grid");
+        mSceneNames.add("The Shire");
+        mSceneNames.add("Parrots");
+        mSceneNames.add("SSME");
+
 
         // Create a GLSurfaceView instance and set it
         // as the ContentView for this Activity.
         mGLView = (FpvGLSurfaceView) findViewById(R.id.gl_surface);
+        mNotificationTextView = (TextView) findViewById(R.id.notification_text);
         //setContentView(mGLView);
 
         /*SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -114,64 +126,52 @@ public class FpvToolBox extends AppCompatActivity
                 SensorManager.SENSOR_DELAY_GAME);*/
         mWebView = (WebView) findViewById(R.id.web_view);
         mWebView.getSettings().setJavaScriptEnabled(true);
-        //mWebView.getSettings().setBuiltInZoomControls(true);
-        //mWebView.getSettings().setSupportZoom(true);
-        //mWebView.getSettings().setLoadWithOverviewMode(true);
 
         mGLLinearLayout = (GLRelativeLayout) findViewById(R.id.gl_layout);
         mGLView.SetRootView(mGLLinearLayout);
 
         mGLLinearLayout.setViewToGLRenderer(mGLView.GetRenderer());
-        //WebSettings webSettings = mWebView.getSettings();
-        //webSettings.setJavaScriptEnabled(true);
-        //mWebView.setWebViewClient(new WebViewClient());
-        //mWebView.setWebChromeClient(new WebChromeClient());
-        //mWebView.loadUrl("http://helium-rain.com");
-        //WebView.loadUrl("http://techslides.com/demos/sample-videos/small.mp4");
-        //mWebView.loadUrl("http://cdn.spacetelescope.org/archives/images/screen/heic0602a.jpg");
-        //mWebView.loadUrl("http://science-all.com/images/wallpapers/images-of-parrots/images-of-parrots-16.jpg");
-        String url = "http://science-all.com/images/wallpapers/images-of-parrots/images-of-parrots-16.jpg";
-        //String url = "http://www.flights.com/blog/wp-content/uploads/2015/03/LOTR-Hobbiton-New-Zeland.jpg";
-        //String url = "http://www.allodocteurs.fr/media/8871-09ADGrilleDepistage.jpg";
-        //String url = "http://www.sp-services.co.uk/Tutorial/10x10gridwhite.gif";
+        mNotificationHandler = new Handler();
 
+    }
 
-
-        String content = "<body style=\"background-color:black;margin: 0; padding: 0;\"><img style=\"margin:0; display: inline;height: auto;max-width: 100%; position: absolute; top: 50%; transform: translateY(-50%);\" src=\""+url+"\" /><body>";
-        //mWebView.loadDataWithBaseURL(null, content, "text/html", "UTF-8", null);
-
-        //WebView.loadUrl("http://172.20.31.106/fpv/fpv.html");
-
-
-
-
-       // mWebView.loadUrl(mUrlString);
-
-        /*final Handler handler = new Handler();
+    private void sendNotification(String text)
+    {
+        mNotificationTextView.setText(text);
+        mNotificationHandler.removeCallbacksAndMessages(null);
         Runnable runnable = new Runnable() {
 
             @Override
             public void run() {
-
+                mNotificationTextView.setText("");
             }
         };
-        handler.postDelayed(runnable, 1000);*/
+        mNotificationHandler.postDelayed(runnable, 2000);
+
     }
+
+
 
 
     @Override
     protected void onResume() {
         super.onResume();
-        Log.e("plop", "on resume2 "+ mUrlString);
 
-
-
-        mWebView.loadUrl(mUrlString);
-        mGLLinearLayout.invalidate();
+        updateScene();
+        mGLView.setViewScale(mViewScale);
+        mGLView.setIpd(mIpd);
 
         mWebView.setWebViewClient(new WebViewClient() {
 
+
+            @Override
+            public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                mGLView.setForceRedraw(true);
+            }
+
             public void onPageFinished(WebView view, String url) {
+                mGLView.setForceRedraw(false);
+
                 final Handler handler = new Handler();
                 Runnable runnable = new Runnable() {
 
@@ -185,12 +185,186 @@ public class FpvToolBox extends AppCompatActivity
             }
         });
 
+        mGLView.GetRenderer().setChromaticAberrationCorrect(mChromaticAberrationCorrection);
+        mGLView.GetRenderer().setDistortionCorrection(mDistortionCorrection);
+        mGLView.GetRenderer().setChromaticAberrationCorrect(mChromaticAberrationCorrection);
+
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        boolean handled = false;
+
+        if ((event.getSource() & InputDevice.SOURCE_GAMEPAD)
+                == InputDevice.SOURCE_GAMEPAD) {
+            if (event.getAction() ==  KeyEvent.ACTION_DOWN) {
+
+                switch (event.getKeyCode()) {
+                    case KeyEvent.KEYCODE_BUTTON_A:
+                        toogleChromaticAberrationCorrection();
+                        break;
+                    case KeyEvent.KEYCODE_BUTTON_B:
+                        toogleDistortionCorrection();
+                        break;
+                    case KeyEvent.KEYCODE_BUTTON_Y:
+                        toogleLensLimits();
+                        break;
+                    case KeyEvent.KEYCODE_BUTTON_START:
+                        resetSettings();
+                        break;
+                    case KeyEvent.KEYCODE_BUTTON_L1:
+                        decreaseIPD();
+                        break;
+                    case KeyEvent.KEYCODE_BUTTON_R1:
+                        increaseIPD();
+                        break;
+                }
+                Log.e("plop", "Key =" + event.getKeyCode() + " event.getAction()= "+ event.getAction());
+
+            }
+            handled = true;
+        }
+        else if ((event.getSource() & InputDevice.SOURCE_CLASS_JOYSTICK)
+                == InputDevice.SOURCE_CLASS_JOYSTICK) {
+
+            if (event.getAction() ==  KeyEvent.ACTION_DOWN) {
+
+                switch (event.getKeyCode()) {
+                    case KeyEvent.KEYCODE_DPAD_RIGHT:
+                        nextScene();
+                        break;
+                    case KeyEvent.KEYCODE_DPAD_LEFT:
+                        previousScene();
+                        break;
+                    case KeyEvent.KEYCODE_DPAD_UP:
+                        increaseScale();
+                        break;
+                    case KeyEvent.KEYCODE_DPAD_DOWN:
+                        decreaseScale();
+                        break;
+                }
+                Log.e("plop", "Key =" + event.getKeyCode() + " event.getAction()= "+ event.getAction());
+
+            }
+            Log.e("plop","Dpad ="+ event.getKeyCode());
+            handled = true;
+        }
+        else
+        {
+            Log.e("plop","event form source : "+ event.getSource());
+        }
+
+        return handled;
+    }
+
+    private void resetSettings() {
+        mIpd = DEFAULT_IPD;
+        mViewScale = DEFAULT_SCALE;
+        mChromaticAberrationCorrection = true;
+        mDistortionCorrection = true;
+        mLensLimits = false;
+
+        mGLView.setIpd(mIpd);
+        mGLView.setViewScale(mViewScale);
+        mGLView.GetRenderer().setChromaticAberrationCorrect(mChromaticAberrationCorrection);
+        mGLView.GetRenderer().setDistortionCorrection(mDistortionCorrection);
+        mGLView.GetRenderer().setShowLensLimits(mLensLimits);
+
+
+        sendNotification("Settings reset");
+    }
+
+    private void increaseScale() {
+        mViewScale += 0.01;
+        mGLView.setViewScale(mViewScale);
+        sendNotification("Scale: "+ String.format("%1.0f", mViewScale * 100) + "%");
+    }
+
+    private void decreaseScale() {
+        mViewScale -= 0.01;
+        mGLView.setViewScale(mViewScale);
+        sendNotification("Scale: "+ String.format("%1.0f", mViewScale * 100) + "%");
+    }
+
+    private void increaseIPD() {
+        mIpd += 0.1;
+        mGLView.setIpd(mIpd);
+        sendNotification("IPD: "+ String.format("%1.1f", mIpd) + "mm");
+    }
+
+    private void decreaseIPD() {
+        mIpd -= 0.1;
+        mGLView.setIpd(mIpd);
+        sendNotification("IPD: "+ String.format("%1.1f", mIpd) + "mm");
+    }
+
+    private void nextScene() {
+        mCurrentSceneIndex++;
+        if(mCurrentSceneIndex > mScenes.size()-1)
+        {
+            mCurrentSceneIndex = 0;
+        }
+        Log.e("plop","nextScene");
+        updateScene();
+    }
+
+    private void previousScene() {
+        mCurrentSceneIndex--;
+        if(mCurrentSceneIndex < 0)
+        {
+            mCurrentSceneIndex = mScenes.size() -1;
+        }
+        Log.e("plop","previousScene");
+
+        updateScene();
+    }
+
+    private void updateScene()
+    {
+        String url = mScenes.get(mCurrentSceneIndex);
+        Log.e("plop","updateScene : "+ url);
+        mWebView.loadUrl(url);
+        mGLLinearLayout.invalidate();
+        sendNotification("Scene: "+mSceneNames.get(mCurrentSceneIndex));
+
+    }
+
+    private void toogleChromaticAberrationCorrection() {
+        mChromaticAberrationCorrection = !mChromaticAberrationCorrection;
+        mGLView.GetRenderer().setChromaticAberrationCorrect(mChromaticAberrationCorrection);
+        sendNotification("Chromatic aberration correction: "+(mChromaticAberrationCorrection ? "ON" : "OFF"));
+    }
+
+    private void toogleLensLimits() {
+        mLensLimits = !mLensLimits;
+        mGLView.GetRenderer().setShowLensLimits(mLensLimits);
+        sendNotification("Show lens limits: "+(mLensLimits ? "ON" : "OFF"));
+    }
+
+    private void toogleDistortionCorrection() {
+        mDistortionCorrection = !mDistortionCorrection;
+        mGLView.GetRenderer().setDistortionCorrection(mDistortionCorrection);
+        float ScaleCorrection = 1.5f;
+        if(mDistortionCorrection)
+        {
+            mViewScale /= ScaleCorrection;
+        }
+        else
+        {
+            mViewScale *= ScaleCorrection;
+        }
+        mGLView.setViewScale(mViewScale);
+        sendNotification("Distortion correction: "+(mDistortionCorrection ? "ON" : "OFF"));
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
-        outState.putString("url", mUrlString);
-        Log.e("plop", "on save "+ mUrlString);
+        outState.putInt("currentSceneIndex", mCurrentSceneIndex);
+        outState.putBoolean("chromaticAberrationCorrection", mChromaticAberrationCorrection);
+        outState.putBoolean("lensLimits", mLensLimits);
+        outState.putBoolean("distortionCorrection", mDistortionCorrection);
+        outState.putDouble("viewScale", mViewScale);
+        outState.putDouble("ipd", mIpd);
 
         super.onSaveInstanceState(outState, outPersistentState);
     }
@@ -199,14 +373,35 @@ public class FpvToolBox extends AppCompatActivity
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
 
-        if(savedInstanceState.containsKey("url"))
+        if(savedInstanceState.containsKey("currentSceneIndex"))
         {
-
-
-            mUrlString = savedInstanceState.getString("url");
+            mCurrentSceneIndex = savedInstanceState.getInt("currentSceneIndex", 0);
         }
-        Log.e("plop", "on restore"+ mUrlString);
 
+        if(savedInstanceState.containsKey("chromaticAberrationCorrection"))
+        {
+            mChromaticAberrationCorrection = savedInstanceState.getBoolean("chromaticAberrationCorrection", true);
+        }
+
+        if(savedInstanceState.containsKey("chromaticAberrationCorrection"))
+        {
+            mDistortionCorrection = savedInstanceState.getBoolean("distortionCorrection", true);
+        }
+
+        if(savedInstanceState.containsKey("ipd"))
+        {
+            mIpd = savedInstanceState.getFloat("ipd", 63.f);
+        }
+
+        if(savedInstanceState.containsKey("viewScale"))
+        {
+            mViewScale = savedInstanceState.getFloat("viewScale", 63.f);
+        }
+
+        if(savedInstanceState.containsKey("lensLimits"))
+        {
+            mLensLimits = savedInstanceState.getBoolean("lensLimits", false);
+        }
     }
 
     @Override
@@ -249,22 +444,18 @@ public class FpvToolBox extends AppCompatActivity
         Log.e("plop", "onNavigationItemSelected");
 
         if (id == R.id.nav_camera) {
-            mUrlString = "http://niavok.com/fpv/grid.html";
+            nextScene();
         } else if (id == R.id.nav_gallery) {
-            mUrlString = "http://niavok.com/fpv/lotr.html";
+            previousScene();
         } else if (id == R.id.nav_slideshow) {
-            mUrlString = "http://niavok.com/fpv/parrot.html";
+            toogleChromaticAberrationCorrection();
         } else if (id == R.id.nav_manage) {
-            mUrlString = "http://niavok.com/fpv/ssme.html";
+
         } else if (id == R.id.nav_share) {
-            mWebView.loadUrl(mUrlString);
+
         } else if (id == R.id.nav_send) {
 
         }
-
-         mWebView.loadUrl(mUrlString);
-
-        mGLLinearLayout.invalidate();
 
 
 

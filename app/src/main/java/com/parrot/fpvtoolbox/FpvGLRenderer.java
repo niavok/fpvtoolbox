@@ -35,12 +35,19 @@ public class FpvGLRenderer  extends ViewToGLRenderer {
     private int mEyeProgram;
     private FpvEye mLeftEye = null;
     private FpvEye mRightEye = null;
+    private FpvEye mLeftEyeNoDistortionCorrection = null;
+    private FpvEye mRightEyeNoDistortionCorrection = null;
     float mIpd = 63;
 
 
     private float mMetricsWidth; // In millimeters
     private float mMetricsHeight; // In millimeters
     private View mRootView;
+    private boolean mChromaticAberrationCorrection = true;
+    private boolean mDistortionCorrection = true;
+    private boolean mForceRedraw = false;
+    private float mViewScale;
+    private boolean mShowLensLimits;
 
     public FpvGLRenderer(Context context) {
 
@@ -50,22 +57,32 @@ public class FpvGLRenderer  extends ViewToGLRenderer {
 
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
         super.onSurfaceCreated(gl, config);
-        // initialize a triangle
-        mTriangle = new Triangle();
-        // initialize a square
-        mSquare = new Square();
 
         try {
             initEyeShaders();
             if(mEyeProgram != 0) {
-                IntBuffer indices = LoadIntBuffer("indices");
-                FloatBuffer colors = LoadFloatBuffer("colors");
-                FloatBuffer positions = LoadFloatBuffer("positions");
-                FloatBuffer texCoords = LoadFloatBuffer("tex_coords");
+                // Distortion correction
+                {
+                    IntBuffer indices = LoadIntBuffer("indices");
+                    FloatBuffer colors = LoadFloatBuffer("colors");
+                    FloatBuffer positions = LoadFloatBuffer("positions");
+                    FloatBuffer texCoords = LoadFloatBuffer("tex_coords");
 
-                // TODO : don't duplicate array loading in gpu memory
-                mLeftEye = new FpvEye(this, mEyeProgram, indices, positions, colors, texCoords);
-                mRightEye = new FpvEye(this, mEyeProgram, indices, positions, colors, texCoords);
+                    // TODO : don't duplicate array loading in gpu memory
+                    mLeftEye = new FpvEye(this, mEyeProgram, indices, positions, colors, texCoords);
+                    mRightEye = new FpvEye(this, mEyeProgram, indices, positions, colors, texCoords);
+                }
+                // No distortion correction
+                {
+                    IntBuffer indices = LoadIntBuffer("indices_no_dc");
+                    FloatBuffer colors = LoadFloatBuffer("colors_no_dc");
+                    FloatBuffer positions = LoadFloatBuffer("positions_no_dc");
+                    FloatBuffer texCoords = LoadFloatBuffer("tex_coords_no_dc");
+
+                    // TODO : don't duplicate array loading in gpu memory
+                    mLeftEyeNoDistortionCorrection = new FpvEye(this, mEyeProgram, indices, positions, colors, texCoords);
+                    mRightEyeNoDistortionCorrection = new FpvEye(this, mEyeProgram, indices, positions, colors, texCoords);
+                }
                 setupEyes(50, mIpd);
             }
 
@@ -151,14 +168,31 @@ public class FpvGLRenderer  extends ViewToGLRenderer {
     }
 
     private void setupEyes(float eyeSize, float ipd) {
-        mLeftEye.setEyeWidth(eyeSize);
-        mLeftEye.setEyeHeight(eyeSize);
-        mLeftEye.setEyeOffsetX(-ipd / 2);
+        if(mLeftEye != null) {
+            mLeftEye.setEyeWidth(eyeSize);
+            mLeftEye.setEyeHeight(eyeSize);
+            mLeftEye.setEyeOffsetX(-ipd / 2);
+        }
 
 
-        mRightEye.setEyeWidth(eyeSize);
-        mRightEye.setEyeHeight(eyeSize);
-        mRightEye.setEyeOffsetX(ipd / 2);
+        if(mRightEye != null) {
+            mRightEye.setEyeWidth(eyeSize);
+            mRightEye.setEyeHeight(eyeSize);
+            mRightEye.setEyeOffsetX(ipd / 2);
+        }
+
+        if(mLeftEyeNoDistortionCorrection != null) {
+            mLeftEyeNoDistortionCorrection.setEyeWidth(eyeSize);
+            mLeftEyeNoDistortionCorrection.setEyeHeight(eyeSize);
+            mLeftEyeNoDistortionCorrection.setEyeOffsetX(-ipd / 2);
+        }
+
+
+        if(mRightEyeNoDistortionCorrection != null) {
+            mRightEyeNoDistortionCorrection.setEyeWidth(eyeSize);
+            mRightEyeNoDistortionCorrection.setEyeHeight(eyeSize);
+            mRightEyeNoDistortionCorrection.setEyeOffsetX(ipd / 2);
+        }
     }
 
     private void initEyeShaders() throws IOException {
@@ -179,6 +213,16 @@ public class FpvGLRenderer  extends ViewToGLRenderer {
     float max = 70;*/
 
     public void onDrawFrame(GL10 gl) {
+        if(mForceRedraw)
+        {
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    Log.d("UI thread", "I am the UI thread");
+                    mRootView.invalidate();
+                }
+            });
+        }
         super.onDrawFrame(gl);
         // Redraw background color
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
@@ -208,15 +252,27 @@ public class FpvGLRenderer  extends ViewToGLRenderer {
 
         setupEyes(10, mIpd);
 */
-        if (mLeftEye != null)
+        if(mDistortionCorrection) {
+            if (mLeftEye != null) {
+                mLeftEye.draw();
+            }
+
+            if (mRightEye != null) {
+                mRightEye.draw();
+            }
+        }
+        else
         {
-            mLeftEye.draw();
+            if (mLeftEyeNoDistortionCorrection != null) {
+                mLeftEyeNoDistortionCorrection.draw();
+            }
+
+            if (mRightEyeNoDistortionCorrection != null) {
+                mRightEyeNoDistortionCorrection.draw();
+            }
         }
 
-        if (mRightEye != null)
-        {
-            mRightEye.draw();
-        }
+
         //mTriangle.draw();
 
     }
@@ -327,5 +383,48 @@ public class FpvGLRenderer  extends ViewToGLRenderer {
 
     public void setRootView(View rootView) {
         mRootView = rootView;
+    }
+
+    public void setChromaticAberrationCorrect(boolean chromaticAberrationCorrection) {
+
+        mChromaticAberrationCorrection = chromaticAberrationCorrection;
+    }
+
+    public boolean isChromaticAberrationCorrection() {
+        return mChromaticAberrationCorrection;
+    }
+
+    public void setForceRedraw(boolean forceRedraw) {
+        mForceRedraw = forceRedraw;
+    }
+
+    public void setViewScale(float viewScale) {
+        mViewScale = viewScale;
+    }
+
+    public void setIpd(float ipd) {
+        mIpd = ipd;
+        setupEyes(50, mIpd);
+    }
+
+
+    public float getIpd() {
+        return mIpd;
+    }
+
+    public float getViewScale() {
+        return mViewScale;
+    }
+
+    public void setDistortionCorrection(boolean distortionCorrection) {
+        mDistortionCorrection = distortionCorrection;
+    }
+
+    public void setShowLensLimits(boolean showLensLimits) {
+        mShowLensLimits = showLensLimits;
+    }
+
+    public boolean isShowLensLimits() {
+        return mShowLensLimits;
     }
 }
