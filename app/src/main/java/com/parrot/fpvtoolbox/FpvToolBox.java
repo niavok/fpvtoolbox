@@ -3,6 +3,7 @@ package com.parrot.fpvtoolbox;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.media.MediaMetadataRetriever;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -27,7 +28,9 @@ import android.webkit.WebViewClient;
 import android.widget.TextView;
 import android.widget.VideoView;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class FpvToolBox extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -160,10 +163,12 @@ public class FpvToolBox extends AppCompatActivity
         Log.e("plop", "on resume");
 
 
+        generateScenes();
+
+
         updateScene();
         setViewScale(mViewScale);
         setIpd(mIpd);
-
 
         mWebView.setWebViewClient(new WebViewClient() {
 
@@ -195,6 +200,58 @@ public class FpvToolBox extends AppCompatActivity
 
 
 
+    }
+
+    private void generateScenes() {
+
+        mScenes = new ArrayList<FpvScene>();
+        mScenes.add(new FpvScene("Grid", "http://niavok.com/fpv/grid.html", FpvScene.SceneType.WEB, "1000 px x 1000 px picture"));
+
+        generateVideoScenes();
+
+        mScenes.add(new FpvScene("The Shire", "http://niavok.com/fpv/lotr.html", FpvScene.SceneType.WEB, "1620 px x 1080 px picture"));
+        mScenes.add(new FpvScene("SSME", "http://niavok.com/fpv/ssme.html", FpvScene.SceneType.WEB, "1080 px x 1350 px picture"));
+        mScenes.add(new FpvScene("Parrots", "http://niavok.com/fpv/parrot.html", FpvScene.SceneType.WEB, "1080p"));
+
+        if(mCurrentSceneIndex >= mScenes.size())
+        {
+            mCurrentSceneIndex = 1;
+        }
+    }
+
+    private void generateVideoScenes() {
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    0);
+        } else {
+            File videosPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
+
+
+            if(videosPath.exists()) {
+
+                File[] fileList = videosPath.listFiles();
+                Arrays.sort(fileList);
+                for(File videoFile : fileList) {
+
+                    Log.e("Plop", "Analyse video "+videoFile.getName());
+                    MediaMetadataRetriever metaRetriever = new MediaMetadataRetriever();
+                    metaRetriever.setDataSource(videoFile.getAbsolutePath());
+                    if(metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_VIDEO) != null)
+                    {
+                        String height = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT);
+                        String width = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH);
+
+                        mScenes.add(new FpvScene(videoFile.getName(),  videoFile.getAbsolutePath(), FpvScene.SceneType.VIDEO, ""+width+" px x "+height+" px video"));
+                    }
+
+
+                }
+            }
+        }
     }
 
     @Override
