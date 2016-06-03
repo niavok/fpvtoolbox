@@ -40,7 +40,7 @@ public class FpvGLSurfaceView extends GLSurfaceView {
 
     public void SetRootView(View view) {
         mRenderer.setRootView(view);
-        setZOrderOnTop(true);    // necessary
+       // setZOrderOnTop(true);    // necessary
         getHolder().setFormat(PixelFormat.RGBA_8888);
 
     }

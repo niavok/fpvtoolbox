@@ -12,15 +12,17 @@
 
     <com.parrot.fpvtoolbox.FpvGLSurfaceView
         android:keepScreenOn="true"
-        android:id="@+id/gl_video_surface"
+        android:id="@+id/gl_surface"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
     <com.parrot.fpvtoolbox.FpvGLSurfaceView
         android:keepScreenOn="true"
-        android:id="@+id/gl_surface"
+        android:id="@+id/gl_video_surface"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
+
 
 
 

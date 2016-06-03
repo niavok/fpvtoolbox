@@ -484,18 +484,28 @@ public class FpvToolBox extends AppCompatActivity
         int id = item.getItemId();
         Log.e("plop", "onNavigationItemSelected");
 
-        if (id == R.id.nav_camera) {
+        if (id == R.id.nav_next) {
             nextScene();
-        } else if (id == R.id.nav_gallery) {
+        } else if (id == R.id.nav_previous) {
             previousScene();
-        } else if (id == R.id.nav_slideshow) {
+        } else if (id == R.id.nav_toogle_cac) {
             toogleChromaticAberrationCorrection();
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
+        } else if (id == R.id.nav_toogle_dc) {
+            toogleDistortionCorrection();
+        } else if (id == R.id.nav_toogle_limits) {
+            toogleLensLimits();
+        } else if (id == R.id.nav_reset_settings) {
+            resetSettings();
+        } else if (id == R.id.nav_reload) {
+            reload();
+        } else if (id == R.id.nav_increase_ipd) {
+            increaseIPD();
+        } else if (id == R.id.nav_decrease_ipd) {
+            decreaseIPD();
+        } else if (id == R.id.nav_increase_scale) {
+            increaseScale();
+        } else if (id == R.id.nav_decrease_scale) {
+            decreaseScale();
         }
 
 

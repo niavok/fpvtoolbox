@@ -3,24 +3,42 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_camera"
-            android:icon="@drawable/ic_menu_camera"
-            android:title="Grid" />
+            android:id="@+id/nav_next"
+            android:title="Next (Dpad Right)" />
         <item
-            android:id="@+id/nav_gallery"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="The Shire" />
+            android:id="@+id/nav_previous"
+            android:title="Previous (Dpad  Left)" />
         <item
-            android:id="@+id/nav_slideshow"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="Parrot" />
+            android:id="@+id/nav_toogle_cac"
+            android:title="Toogle chromatic aberration correction (A)" />
         <item
-            android:id="@+id/nav_manage"
-            android:icon="@drawable/ic_menu_manage"
-            android:title="SSME" />
+            android:id="@+id/nav_toogle_dc"
+            android:title="Toogle distortion correction (B)" />
+        <item
+            android:id="@+id/nav_increase_scale"
+            android:title="Increase scale (Dpad  Up)" />
+        <item
+            android:id="@+id/nav_decrease_scale"
+            android:title="Decrease scale (Dpad  Down)" />
+        <item
+            android:id="@+id/nav_increase_ipd"
+            android:title="Increase IPD (Right trigger)" />
+        <item
+            android:id="@+id/nav_decrease_ipd"
+            android:title="Decrease IPD (Left trigger)" />
+        <item
+            android:id="@+id/nav_toogle_limits"
+            android:title="Toogle show lens limits (Y)" />
+        <item
+            android:id="@+id/nav_reset_settings"
+            android:title="Reset settings (Start)" />
+        <item
+            android:id="@+id/nav_reload"
+            android:title="Reload (X)" />
+
     </group>
 
-    <item android:title="Communicate">
+   <!--> <item android:title="Communicate">
         <menu>
             <item
                 android:id="@+id/nav_share"
@@ -31,6 +49,6 @@
                 android:icon="@drawable/ic_menu_send"
                 android:title="Send" />
         </menu>
-    </item>
+    </item>-->
 
 </menu>
