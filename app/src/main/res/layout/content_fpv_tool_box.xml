@@ -8,9 +8,17 @@
     tools:context="com.parrot.fpvtoolbox.FpvToolBox"
     tools:showIn="@layout/app_bar_fpv_tool_box">
 
+
     <com.parrot.fpvtoolbox.FpvGLSurfaceView
         android:keepScreenOn="true"
         android:id="@+id/gl_surface"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+
+    <com.parrot.fpvtoolbox.FpvGLSurfaceView
+        android:keepScreenOn="true"
+        android:id="@+id/gl_video_surface"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
@@ -19,7 +27,7 @@
         android:id="@+id/gl_layout"
         android:layout_width="1280px"
         android:layout_height="1280px"
-        android:background="@android:color/white">
+        android:background="@android:color/transparent">
 
         <WebView
             android:id="@+id/web_view"
@@ -35,6 +43,14 @@
             android:text=""
             android:textColor="#FFFFFF"/>
 
+        <TextView
+            android:id="@+id/notification_subtext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_below="@id/notification_text"
+            android:text=""
+            android:textColor="#DDDDDD"/>
     <!--    <ImageView
             android:id="@+id/test_image"
             android:layout_width="wrap_content"

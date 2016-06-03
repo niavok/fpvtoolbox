@@ -3,6 +3,9 @@ package com.parrot.fpvtoolbox;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.opengl.GLES20;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -37,6 +40,11 @@ public class GLRelativeLayout extends RelativeLayout implements GLRenderable {
     public void draw(Canvas canvas) {
         Log.e("GLRelativeLayout", "draw");
 
+        if(mViewToGLRenderer == null)
+        {
+            return;
+        }
+
         Canvas glAttachedCanvas = mViewToGLRenderer.onDrawViewBegin();
         if(glAttachedCanvas != null) {
             //prescale canvas to make sure content fits
@@ -51,6 +59,9 @@ public class GLRelativeLayout extends RelativeLayout implements GLRenderable {
             Log.e("GLRelativeLayout", "canvas.getWidth()="+canvas.getWidth());
             Log.e("GLRelativeLayout", "xScale="+xScale);
             Log.e("GLRelativeLayout", "yScale="+yScale);
+            glAttachedCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+
+
 
             //draw the view to provided canvas
             super.draw(glAttachedCanvas);

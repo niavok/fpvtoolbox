@@ -282,7 +282,25 @@ public class FpvEye {
         GLES20.glVertexAttribPointer(mProgramTexCoord2, 2, GLES20.GL_FLOAT, false, 0, 0);
 
         //GLES20.glUniform2f(mProgramEyeToSourceUVScale, 2f, 2f);
-        GLES20.glUniform2f(mProgramEyeToSourceUVScale, mRenderer.getViewScale(), mRenderer.getViewScale());
+
+        //Texture aspect ratio
+        if(mRenderer.getTextureWidth() == mRenderer.getTextureHeight())
+        {
+            GLES20.glUniform2f(mProgramEyeToSourceUVScale, mRenderer.getViewScale(), mRenderer.getViewScale());
+        }
+        else
+        {
+            float ratio = (float) mRenderer.getTextureWidth() / (float) mRenderer.getTextureHeight();
+            if(ratio > 1)
+            {
+                GLES20.glUniform2f(mProgramEyeToSourceUVScale, mRenderer.getViewScale(), mRenderer.getViewScale() * ratio);
+            }
+            else
+            {
+                GLES20.glUniform2f(mProgramEyeToSourceUVScale, mRenderer.getViewScale() / ratio, mRenderer.getViewScale());
+            }
+        }
+
         GLES20.glUniform2f(mProgramEyeToSourceUVOffset, 0, 0);
 
         if(mRenderer.isChromaticAberrationCorrection())

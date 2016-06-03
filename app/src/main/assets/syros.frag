@@ -16,7 +16,10 @@ varying mediump vec2 oTexCoord2;
 
 void main()
 {
+    mediump float ResultA;
+
     mediump float ResultR;
+
     if (oTexCoord0.x > 1.0 || oTexCoord0.y > 1.0 || oTexCoord0.x < 0.0 || oTexCoord0.y < 0.0)
     {
 
@@ -35,6 +38,7 @@ void main()
     else
     {
         ResultG = texture2D(Texture0, oTexCoord1).g;
+        ResultA = texture2D(Texture0, oTexCoord1).a;
     }
 
     mediump float ResultB;
@@ -47,6 +51,6 @@ void main()
         ResultB = texture2D(Texture0, oTexCoord2).b;
     }
 
-    gl_FragColor = vec4(ResultR *  oColor.r, ResultG * oColor.g , ResultB * oColor.b, 1.0);
+    gl_FragColor = vec4(ResultR *  oColor.r, ResultG * oColor.g , ResultB * oColor.b, ResultA);
     //gl_FragColor = vec4((ResultR + 0.1) *  oColor.r, (ResultG  + 0.2) * oColor.g, (ResultB + 0.3) * oColor.b , 1.0);
 }

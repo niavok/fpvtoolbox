@@ -1,13 +1,17 @@
 package com.parrot.fpvtoolbox;
 
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.SurfaceTexture;
+import android.media.MediaPlayer;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
 import android.util.Log;
 import android.view.Surface;
+
+import java.io.IOException;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -30,6 +34,9 @@ public class ViewToGLRenderer implements GLSurfaceView.Renderer {
 
     private int mTextureWidth = DEFAULT_TEXTURE_WIDTH;
     private int mTextureHeight = DEFAULT_TEXTURE_HEIGHT;
+    protected MediaPlayer mVideoPlayer;
+    private int mVideoWidth;
+    private int mVideoHeight;
 
 
     @Override
@@ -38,6 +45,36 @@ public class ViewToGLRenderer implements GLSurfaceView.Renderer {
             // update texture
             mSurfaceTexture.updateTexImage();
 
+        }
+    }
+
+    public void enableVideo(Context context, String url)
+    {
+        disableVideo();
+        Log.e("ViewToGLRenderer", "enableVideo "+ url);
+        mVideoPlayer = new MediaPlayer();
+        try {
+            mVideoPlayer.setDataSource(url);
+            mVideoPlayer.setSurface(mSurface);
+            mVideoPlayer.setLooping(true);
+
+            mVideoPlayer.prepare();
+            mVideoWidth = mVideoPlayer.getVideoWidth();
+            mVideoHeight = mVideoPlayer.getVideoHeight();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        mVideoPlayer.start();
+
+    }
+
+    public void disableVideo()
+    {
+        Log.e("ViewToGLRenderer", "disableVideo");
+        if(mVideoPlayer != null) {
+            mVideoPlayer.stop();
+            mVideoPlayer.reset();
+            mVideoPlayer = null;
         }
     }
 
@@ -53,8 +90,10 @@ public class ViewToGLRenderer implements GLSurfaceView.Renderer {
             Log.e("ViewToGLRenderer", "onSurfaceChanged mTextureWidth"+mTextureWidth + " mTextureHeight="+mTextureHeight);
             mSurfaceTexture.setDefaultBufferSize(mTextureWidth, mTextureHeight);
             mSurface = new Surface(mSurfaceTexture);
+            if(mVideoPlayer != null) {
+                mVideoPlayer.setSurface(mSurface);
+            }
         }
-
     }
 
     public void releaseSurface(){
@@ -131,7 +170,13 @@ public class ViewToGLRenderer implements GLSurfaceView.Renderer {
 
 
     public int getTextureWidth() {
-        return mTextureWidth;
+        if(mVideoPlayer == null) {
+            return mTextureWidth;
+        }
+        else
+        {
+            return mVideoWidth;
+        }
     }
 
     public void setTextureWidth(int textureWidth) {
@@ -139,7 +184,14 @@ public class ViewToGLRenderer implements GLSurfaceView.Renderer {
     }
 
     public int getTextureHeight() {
-        return mTextureHeight;
+
+        if(mVideoPlayer == null) {
+            return mTextureHeight;
+        }
+        else
+        {
+            return mVideoHeight;
+        }
     }
 
     public void setTextureHeight(int textureHeight) {

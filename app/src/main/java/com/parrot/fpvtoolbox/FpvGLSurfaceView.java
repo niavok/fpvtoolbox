@@ -1,6 +1,7 @@
 package com.parrot.fpvtoolbox;
 
 import android.content.Context;
+import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 import android.view.View;
@@ -27,7 +28,7 @@ public class FpvGLSurfaceView extends GLSurfaceView {
         setEGLContextClientVersion(2);
 
 
-
+        setEGLConfigChooser(8, 8, 8, 8, 16, 0);
         mRenderer = new FpvGLRenderer(getContext());
 
         // Set the Renderer for drawing on the GLSurfaceView
@@ -35,15 +36,16 @@ public class FpvGLSurfaceView extends GLSurfaceView {
         //setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 
 
-
-
     }
 
     public void SetRootView(View view) {
         mRenderer.setRootView(view);
+        setZOrderOnTop(true);    // necessary
+        getHolder().setFormat(PixelFormat.RGBA_8888);
+
     }
 
-    public FpvGLRenderer GetRenderer() {
+    public FpvGLRenderer getRenderer() {
         return mRenderer;
     }
 

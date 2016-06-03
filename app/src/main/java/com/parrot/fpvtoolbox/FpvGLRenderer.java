@@ -90,8 +90,14 @@ public class FpvGLRenderer  extends ViewToGLRenderer {
             e.printStackTrace();
         }
 
+        gl.glDisable(GL10.GL_DITHER);
+        gl.glHint(GL10.GL_PERSPECTIVE_CORRECTION_HINT,
+                GL10.GL_FASTEST);
+
+
+
         // Set the background frame color
-        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
         // Use culling to remove back faces.
 //        GLES20.glEnable(GLES20.GL_CULL_FACE);
@@ -213,6 +219,7 @@ public class FpvGLRenderer  extends ViewToGLRenderer {
     float max = 70;*/
 
     public void onDrawFrame(GL10 gl) {
+
         if(mForceRedraw)
         {
             new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -272,9 +279,6 @@ public class FpvGLRenderer  extends ViewToGLRenderer {
             }
         }
 
-
-        //mTriangle.draw();
-
     }
 
     public void onSurfaceChanged(GL10 gl, int width, int height) {
@@ -294,7 +298,9 @@ public class FpvGLRenderer  extends ViewToGLRenderer {
             @Override
             public void run() {
                 Log.d("UI thread", "I am the UI thread");
-                mRootView.invalidate();
+                if(mRootView != null) {
+                    mRootView.invalidate();
+                }
             }
         });
     }
