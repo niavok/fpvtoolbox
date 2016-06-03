@@ -16,7 +16,7 @@ varying mediump vec2 oTexCoord2;
 
 void main()
 {
-    mediump float ResultA;
+    mediump float ResultA = 0.0;;
 
     mediump float ResultR;
 
@@ -28,6 +28,7 @@ void main()
     else
     {
         ResultR = texture2D(Texture0, oTexCoord0).r;
+        ResultA = texture2D(Texture0, oTexCoord1).a;
     }
 
     mediump float ResultG;
@@ -38,7 +39,6 @@ void main()
     else
     {
         ResultG = texture2D(Texture0, oTexCoord1).g;
-        ResultA = texture2D(Texture0, oTexCoord1).a;
     }
 
     mediump float ResultB;

@@ -1,6 +1,7 @@
 package com.parrot.fpvtoolbox;
 
 import android.Manifest;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -8,6 +9,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.PersistableBundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.InputDevice;
 import android.view.KeyEvent;
@@ -18,6 +20,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.TextView;
@@ -70,6 +74,11 @@ public class FpvToolBox extends AppCompatActivity
                         .setAction("Action", null).show();
             }
         });*/
+
+        /*requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);*/
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         /*ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -261,10 +270,17 @@ public class FpvToolBox extends AppCompatActivity
     {
        // ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
 //                0);
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
 
-
-        mWebView.setVisibility(View.INVISIBLE);
-        mGLVideoView.getRenderer().enableVideo(getApplicationContext(), url);
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                        0);
+        } else {
+            mWebView.setVisibility(View.INVISIBLE);
+            mGLVideoView.getRenderer().enableVideo(getApplicationContext(), url);
+        }
     }
 
     public void disableVideo()
