@@ -35,6 +35,18 @@
         <item
             android:id="@+id/nav_reload"
             android:title="Reload (X)" />
+        <item
+            android:id="@+id/nav_pan_up"
+            android:title="Pan up (Right stick up)" />
+        <item
+            android:id="@+id/nav_pan_down"
+            android:title="Pan down (Right stick down)" />
+        <item
+            android:id="@+id/nav_pan_left"
+            android:title="Pan left (Right stick left)" />
+        <item
+            android:id="@+id/nav_pan_right"
+            android:title="Pan right (Right stick right)" />
 
     </group>
 

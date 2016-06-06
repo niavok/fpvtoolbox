@@ -287,6 +287,7 @@ public class FpvEye {
         if(mRenderer.getTextureWidth() == mRenderer.getTextureHeight())
         {
             GLES20.glUniform2f(mProgramEyeToSourceUVScale, mRenderer.getViewScale(), mRenderer.getViewScale());
+            GLES20.glUniform2f(mProgramEyeToSourceUVOffset,mRenderer.getPanH() / mRenderer.getMetricsWidth(), mRenderer.getPanV() / mRenderer.getMetricsHeight());
         }
         else
         {
@@ -294,14 +295,16 @@ public class FpvEye {
             if(ratio > 1)
             {
                 GLES20.glUniform2f(mProgramEyeToSourceUVScale, mRenderer.getViewScale(), mRenderer.getViewScale() * ratio);
+                GLES20.glUniform2f(mProgramEyeToSourceUVOffset,mRenderer.getPanH() / mRenderer.getMetricsWidth(), ratio * mRenderer.getPanV() / mRenderer.getMetricsHeight());
             }
             else
             {
                 GLES20.glUniform2f(mProgramEyeToSourceUVScale, mRenderer.getViewScale() / ratio, mRenderer.getViewScale());
+                GLES20.glUniform2f(mProgramEyeToSourceUVOffset,mRenderer.getPanH() / (ratio *mRenderer.getMetricsWidth()), ratio * mRenderer.getPanV() / mRenderer.getMetricsHeight());
             }
         }
 
-        GLES20.glUniform2f(mProgramEyeToSourceUVOffset, 0, 0);
+
 
         if(mRenderer.isChromaticAberrationCorrection())
         {

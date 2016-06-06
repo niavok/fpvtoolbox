@@ -38,7 +38,9 @@ public class FpvGLRenderer  extends ViewToGLRenderer {
     private FpvEye mLeftEyeNoDistortionCorrection = null;
     private FpvEye mRightEyeNoDistortionCorrection = null;
     float mIpd = 63;
-
+    float mPanH = 0;
+    float mPanV = 0;
+    private float mEyeSize = 50;
 
     private float mMetricsWidth; // In millimeters
     private float mMetricsHeight; // In millimeters
@@ -48,6 +50,9 @@ public class FpvGLRenderer  extends ViewToGLRenderer {
     private boolean mForceRedraw = false;
     private float mViewScale;
     private boolean mShowLensLimits;
+    private int mPixelWidth;
+    private int mPixelHeight;
+
 
     public FpvGLRenderer(Context context) {
 
@@ -83,7 +88,7 @@ public class FpvGLRenderer  extends ViewToGLRenderer {
                     mLeftEyeNoDistortionCorrection = new FpvEye(this, mEyeProgram, indices, positions, colors, texCoords);
                     mRightEyeNoDistortionCorrection = new FpvEye(this, mEyeProgram, indices, positions, colors, texCoords);
                 }
-                setupEyes(50, mIpd);
+                setupEyes();
             }
 
         } catch (IOException e) {
@@ -173,31 +178,35 @@ public class FpvGLRenderer  extends ViewToGLRenderer {
         return floatBuffer;
     }
 
-    private void setupEyes(float eyeSize, float ipd) {
+    private void setupEyes() {
         if(mLeftEye != null) {
-            mLeftEye.setEyeWidth(eyeSize);
-            mLeftEye.setEyeHeight(eyeSize);
-            mLeftEye.setEyeOffsetX(-ipd / 2);
+            mLeftEye.setEyeWidth(mEyeSize);
+            mLeftEye.setEyeHeight(mEyeSize);
+            mLeftEye.setEyeOffsetX(-mIpd / 2);
+           // mLeftEye.setEyeOffsetY(mPanV);
         }
 
 
         if(mRightEye != null) {
-            mRightEye.setEyeWidth(eyeSize);
-            mRightEye.setEyeHeight(eyeSize);
-            mRightEye.setEyeOffsetX(ipd / 2);
+            mRightEye.setEyeWidth(mEyeSize);
+            mRightEye.setEyeHeight(mEyeSize);
+            mRightEye.setEyeOffsetX(mIpd / 2);
+            //mRightEye.setEyeOffsetY(mPanV);
         }
 
         if(mLeftEyeNoDistortionCorrection != null) {
-            mLeftEyeNoDistortionCorrection.setEyeWidth(eyeSize);
-            mLeftEyeNoDistortionCorrection.setEyeHeight(eyeSize);
-            mLeftEyeNoDistortionCorrection.setEyeOffsetX(-ipd / 2);
+            mLeftEyeNoDistortionCorrection.setEyeWidth(mEyeSize);
+            mLeftEyeNoDistortionCorrection.setEyeHeight(mEyeSize);
+            mLeftEyeNoDistortionCorrection.setEyeOffsetX(-mIpd / 2);
+           // mLeftEyeNoDistortionCorrection.setEyeOffsetY(mPanV);
         }
 
 
         if(mRightEyeNoDistortionCorrection != null) {
-            mRightEyeNoDistortionCorrection.setEyeWidth(eyeSize);
-            mRightEyeNoDistortionCorrection.setEyeHeight(eyeSize);
-            mRightEyeNoDistortionCorrection.setEyeOffsetX(ipd / 2);
+            mRightEyeNoDistortionCorrection.setEyeWidth(mEyeSize);
+            mRightEyeNoDistortionCorrection.setEyeHeight(mEyeSize);
+            mRightEyeNoDistortionCorrection.setEyeOffsetX(mIpd / 2);
+           // mRightEyeNoDistortionCorrection.setEyeOffsetY(mPanV);
         }
     }
 
@@ -261,10 +270,12 @@ public class FpvGLRenderer  extends ViewToGLRenderer {
 */
         if(mDistortionCorrection) {
             if (mLeftEye != null) {
+                //GLES20.glScissor(0,0, mPixelWidth / 2, mPixelHeight);
                 mLeftEye.draw();
             }
 
             if (mRightEye != null) {
+                //GLES20.glScissor(mPixelWidth / 2,0, mPixelWidth / 2, mPixelHeight);
                 mRightEye.draw();
             }
         }
@@ -282,6 +293,8 @@ public class FpvGLRenderer  extends ViewToGLRenderer {
     }
 
     public void onSurfaceChanged(GL10 gl, int width, int height) {
+        mPixelWidth = width;
+        mPixelHeight = height;
         super.onSurfaceChanged(gl, width, height);
         GLES20.glViewport(0, 0, width, height);
         Log.e("FpvGLRenderer", "onSurfaceChanged width=" + width + " height="+height);
@@ -410,7 +423,7 @@ public class FpvGLRenderer  extends ViewToGLRenderer {
 
     public void setIpd(float ipd) {
         mIpd = ipd;
-        setupEyes(50, mIpd);
+        setupEyes();
     }
 
 
@@ -432,5 +445,19 @@ public class FpvGLRenderer  extends ViewToGLRenderer {
 
     public boolean isShowLensLimits() {
         return mShowLensLimits;
+    }
+
+    public void setPan(float panH, float panV) {
+        mPanH = panH;
+        mPanV = panV;
+        setupEyes();
+    }
+
+    public float getPanH() {
+        return mPanH;
+    }
+
+    public float getPanV() {
+        return mPanV;
     }
 }

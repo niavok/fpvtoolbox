@@ -20,6 +20,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -38,6 +39,12 @@ public class FpvToolBox extends AppCompatActivity
     private static final String TAG = "FpvToolBox";
     private static final float DEFAULT_IPD = 63.0f;
     private static final float DEFAULT_SCALE = 0.75f;
+    private static final float DEFAULT_PAN_H = 0.0f;
+    private static final float DEFAULT_PAN_V = 0.0f;
+
+    private static final float PAN_DEAD_ZONE = 0.01f;
+    private static final float PAN_MAX_SPEED = 10f;
+    private static final float PAN_MAX_OFFSET = 50f;
 
 
     private FpvGLSurfaceView mGLView;
@@ -60,6 +67,11 @@ public class FpvToolBox extends AppCompatActivity
     private Handler mNotificationHandler;
     private float mViewScale = DEFAULT_SCALE;
     private float mIpd = DEFAULT_IPD;
+    private float mHPanCommand;
+    private float mVPanCommand;
+    private Handler mPanHandler;
+    private float mPanH = DEFAULT_PAN_H;
+    private float mPanV = DEFAULT_PAN_V;
 
 
     @Override
@@ -127,7 +139,7 @@ public class FpvToolBox extends AppCompatActivity
 
         mGLLinearLayout.setViewToGLRenderer(mGLView.getRenderer());
         mNotificationHandler = new Handler();
-
+        mPanHandler = new Handler();
 
 
     }
@@ -169,6 +181,7 @@ public class FpvToolBox extends AppCompatActivity
         updateScene();
         setViewScale(mViewScale);
         setIpd(mIpd);
+        setPan(mPanH, mPanV);
 
         mWebView.setWebViewClient(new WebViewClient() {
 
@@ -198,6 +211,46 @@ public class FpvToolBox extends AppCompatActivity
         setDistortionCorrection(mDistortionCorrection);
         setChromaticAberrationCorrect(mChromaticAberrationCorrection);
 
+
+        Runnable runnable = new Runnable() {
+
+            @Override
+            public void run() {
+                updatePan(30);
+                mPanHandler.postDelayed(this, 30);
+            }
+
+        };
+        mPanHandler.postDelayed(runnable, 30);
+
+    }
+
+    @Override
+    protected void onPause() {
+        mPanHandler.removeCallbacksAndMessages(null);
+        super.onPause();
+    }
+
+
+    private void updatePan(int deltaMs) {
+
+        float command = (float) Math.sqrt(mHPanCommand * mHPanCommand + mVPanCommand * mVPanCommand);
+        float angle = (float) Math.atan2(mVPanCommand, mHPanCommand);
+        float clampedCommand = 0;
+        if (command > PAN_DEAD_ZONE) {
+            clampedCommand = (command - PAN_DEAD_ZONE) / (1 - PAN_DEAD_ZONE);
+        }
+
+        if(clampedCommand > 0)
+        {
+            float deltaPosition = clampedCommand * clampedCommand * PAN_MAX_SPEED * (deltaMs / 1000.f);
+            float deltaPositionH = -(float) Math.cos(angle) * deltaPosition;
+            float deltaPositionV = - (float) Math.sin(angle) * deltaPosition;
+
+
+            setPan(mPanH + deltaPositionH, mPanV + deltaPositionV);
+            sendNotification("Pan H = "+String.format("%1.1f", mPanH)+"mm, Pan V = "+ String.format("%1.1f", mPanV) +"mm");
+        }
 
 
     }
@@ -257,6 +310,8 @@ public class FpvToolBox extends AppCompatActivity
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         boolean handled = false;
+        Log.e("plop","dispatchKeyEvent "+ event.toString());
+
 
         if ((event.getSource() & InputDevice.SOURCE_GAMEPAD)
                 == InputDevice.SOURCE_GAMEPAD) {
@@ -312,7 +367,7 @@ public class FpvToolBox extends AppCompatActivity
                 Log.e("plop", "Key =" + event.getKeyCode() + " event.getAction()= "+ event.getAction());
 
             }
-            Log.e("plop","Dpad ="+ event.getKeyCode());
+            //Log.e("plop","Dpad ="+ event.getKeyCode(), " "+ e.t);
             handled = true;
         }
         else
@@ -321,6 +376,28 @@ public class FpvToolBox extends AppCompatActivity
         }
 
         return handled;
+    }
+
+    @Override
+    public boolean dispatchGenericMotionEvent(MotionEvent ev) {
+        mHPanCommand = ev.getAxisValue(MotionEvent.AXIS_Z);
+        mVPanCommand = ev.getAxisValue(MotionEvent.AXIS_RZ);
+
+        /*Log.e("plop","dispatchGenericMotionEvent "+ ev.toString());
+        Log.e("plop","getAction "+ ev.getAction());
+
+        Log.e("plop","AXIS_HAT_X "+  ev.getAxisValue(MotionEvent.AXIS_HAT_X));
+        Log.e("plop","AXIS_HAT_Y "+  ev.getAxisValue(MotionEvent.AXIS_HAT_Y));
+        Log.e("plop","AXIS_X "+  ev.getAxisValue(MotionEvent.AXIS_X));
+        Log.e("plop","AXIS_Y "+  ev.getAxisValue(MotionEvent.AXIS_Y));
+        Log.e("plop","AXIS_Z "+  ev.getAxisValue(MotionEvent.AXIS_Z));
+        Log.e("plop","AXIS_RX "+  ev.getAxisValue(MotionEvent.AXIS_RX));
+        Log.e("plop","AXIS_RY "+  ev.getAxisValue(MotionEvent.AXIS_RY));
+        Log.e("plop","AXIS_RZ "+  ev.getAxisValue(MotionEvent.AXIS_RZ));*/
+
+
+
+        return super.dispatchGenericMotionEvent(ev);
     }
 
     public void enableVideo(String url)
@@ -336,12 +413,14 @@ public class FpvToolBox extends AppCompatActivity
                         0);
         } else {
             mWebView.setVisibility(View.INVISIBLE);
+            mGLVideoView.setVisibility(View.VISIBLE);
             mGLVideoView.getRenderer().enableVideo(getApplicationContext(), url);
         }
     }
 
     public void disableVideo()
     {
+        mGLVideoView.setVisibility(View.INVISIBLE);
         mGLVideoView.getRenderer().disableVideo();
         mWebView.setVisibility(View.VISIBLE);
     }
@@ -361,10 +440,12 @@ public class FpvToolBox extends AppCompatActivity
         setChromaticAberrationCorrect(mChromaticAberrationCorrection);
         setDistortionCorrection(mDistortionCorrection);
         setShowLensLimits(mLensLimits);
+        setPan(DEFAULT_PAN_H, DEFAULT_PAN_V);
 
 
         sendNotification("Settings reset");
     }
+
 
     private void increaseScale() {
         setViewScale(mViewScale + 0.01f);
@@ -563,6 +644,22 @@ public class FpvToolBox extends AppCompatActivity
             increaseScale();
         } else if (id == R.id.nav_decrease_scale) {
             decreaseScale();
+        } else if (id == R.id.nav_pan_up) {
+            mVPanCommand = -1;
+            updatePan(100);
+            mVPanCommand = 0;
+        } else if (id == R.id.nav_pan_down) {
+            mVPanCommand = 1;
+            updatePan(100);
+            mVPanCommand = 0;
+        } else if (id == R.id.nav_pan_left) {
+            mHPanCommand = 1;
+            updatePan(100);
+            mHPanCommand = 0;
+        } else if (id == R.id.nav_pan_right) {
+            mHPanCommand = -1;
+            updatePan(100);
+            mHPanCommand = 0;
         }
 
 
@@ -604,5 +701,31 @@ public class FpvToolBox extends AppCompatActivity
         mLensLimits = lensLimits;
         mGLView.getRenderer().setShowLensLimits(mLensLimits);
         mGLVideoView.getRenderer().setShowLensLimits(mLensLimits);
+    }
+
+
+    private void setPan(float panH, float panV) {
+        mPanH = panH;
+        mPanV = panV;
+        if(mPanH < -PAN_MAX_OFFSET)
+        {
+            mPanH = -PAN_MAX_OFFSET;
+        }
+        if(mPanH > PAN_MAX_OFFSET)
+        {
+            mPanH = PAN_MAX_OFFSET;
+        }
+
+        if(mPanV < -PAN_MAX_OFFSET)
+        {
+            mPanV = -PAN_MAX_OFFSET;
+        }
+        if(mPanV > PAN_MAX_OFFSET)
+        {
+            mPanV = PAN_MAX_OFFSET;
+        }
+
+        mGLView.getRenderer().setPan(mPanH, mPanV);
+        mGLVideoView.getRenderer().setPan(mPanH, mPanV);
     }
 }
