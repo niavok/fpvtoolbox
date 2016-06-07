@@ -36,29 +36,11 @@ void main()
         blue_color_distorsion = 0.009;
     }
 
-
-    /*oTexCoord0 = ((TexCoord0 * (1.0 + red_color_distorsion) - vec2(0.5,0.5)) * EyeToSourceUVScale ) + vec2(0.5,0.5) + EyeToSourceUVOffset;
-    oTexCoord1 = ((TexCoord1 * (1.0 + green_color_distorsion) - vec2(0.5,0.5)) * EyeToSourceUVScale) + vec2(0.5,0.5) + EyeToSourceUVOffset;
-    oTexCoord2 = ((TexCoord2 * (1.0 + blue_color_distorsion) - vec2(0.5,0.5)) * EyeToSourceUVScale) + vec2(0.5,0.5) + EyeToSourceUVOffset;*/
-
-
-
     // Vertex inputs are in TanEyeAngle space for the R,G,B channels (i.e. after chromatic aberration and distortion).
     // Scale them into the correct [0-1],[0-1] UV lookup space (depending on eye)
     oTexCoord0 = ((TexCoord0 - vec2(0.5,0.5)) * EyeToSourceUVScale * (1.0 + red_color_distorsion) ) + vec2(0.5,0.5) + EyeToSourceUVOffset;
-    //oTexCoord0.y = 1.0-oTexCoord0.y;
     oTexCoord1 = ((TexCoord1 - vec2(0.5,0.5)) * EyeToSourceUVScale * (1.0 + green_color_distorsion)) + vec2(0.5,0.5) + EyeToSourceUVOffset;
-    //oTexCoord1.y = 1.0-oTexCoord1.y;
     oTexCoord2 = ((TexCoord2 - vec2(0.5,0.5)) * EyeToSourceUVScale* (1.0 + blue_color_distorsion)) + vec2(0.5,0.5) + EyeToSourceUVOffset;
-    //oTexCoord2.y = 1.0-oTexCoord2.y;
-
-    //mediump float colorCorrectionRatio = 0.75;
-    //oTexCoord1 = (1.0 - colorCorrectionRatio) * oTexCoord0 + colorCorrectionRatio * oTexCoord1;
-    //oTexCoord2 = (1.0 - colorCorrectionRatio) * oTexCoord0 + colorCorrectionRatio * oTexCoord2;
-
-    /*oTexCoord0 = TexCoord0;
-    oTexCoord1 = TexCoord1;
-    oTexCoord2 = TexCoord2;*/
 
     oColor = Color; // Used for vignette fade.
 }
