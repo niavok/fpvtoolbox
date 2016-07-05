@@ -16,7 +16,9 @@ public class FpvEye {
     private static final String TAG = "FpvEye";
     private final FloatBuffer mPositionBuffer;
     private final FloatBuffer mColorBuffer;
-    private final FloatBuffer mTextCoordBuffer;
+    private final FloatBuffer mTextCoordBufferRed;
+    private final FloatBuffer mTextCoordBufferGreen;
+    private final FloatBuffer mTextCoordBufferBlue;
     private final IntBuffer mIndicesBuffer;
 
     private FpvGLRenderer mRenderer;
@@ -75,7 +77,7 @@ public class FpvEye {
     };*/
 
 
-    public FpvEye(FpvGLRenderer fpvGLRenderer, int program, IntBuffer indices, FloatBuffer positions, FloatBuffer colors,  FloatBuffer textureCoords) {
+    public FpvEye(FpvGLRenderer fpvGLRenderer, int program, IntBuffer indices, FloatBuffer positions, FloatBuffer colors,  FloatBuffer textureCoordsRed,  FloatBuffer textureCoordsGreen,  FloatBuffer textureCoordsBlue) {
         this.mRenderer = fpvGLRenderer;
 
         mProgram = program;
@@ -90,7 +92,9 @@ public class FpvEye {
         mIndicesBuffer = indices;
         mPositionBuffer = positions;
         mColorBuffer = colors;
-        mTextCoordBuffer = textureCoords;
+        mTextCoordBufferRed = textureCoordsRed;
+        mTextCoordBufferGreen = textureCoordsGreen;
+        mTextCoordBufferBlue = textureCoordsBlue;
 
         Log.d(TAG, "positions float buffer with limit="+positions.limit());
         Log.d(TAG, "mPositionBuffer float buffer with limit="+mPositionBuffer.limit());
@@ -155,16 +159,16 @@ public class FpvEye {
 
         mTextCoord0BufferHandle = generateBuffer();
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mTextCoord0BufferHandle);
-        GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, mTextCoordBuffer.limit() * 4, mTextCoordBuffer, GLES20.GL_STATIC_DRAW);
-        Log.d(TAG, "" + mTextCoordBuffer.limit() + " tex coords loaded");
+        GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, mTextCoordBufferRed.limit() * 4, mTextCoordBufferRed, GLES20.GL_STATIC_DRAW);
+        Log.d(TAG, "" + mTextCoordBufferRed.limit() + " tex coords loaded");
 
         mTextCoord1BufferHandle = generateBuffer();
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mTextCoord1BufferHandle);
-        GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, mTextCoordBuffer.limit() * 4, mTextCoordBuffer, GLES20.GL_STATIC_DRAW);
+        GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, mTextCoordBufferGreen.limit() * 4, mTextCoordBufferGreen, GLES20.GL_STATIC_DRAW);
 
         mTextCoord2BufferHandle = generateBuffer();
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mTextCoord2BufferHandle);
-        GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, mTextCoordBuffer.limit() * 4, mTextCoordBuffer, GLES20.GL_STATIC_DRAW);
+        GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, mTextCoordBufferBlue.limit() * 4, mTextCoordBufferBlue, GLES20.GL_STATIC_DRAW);
     }
 
     private int generateBuffer() {
@@ -268,18 +272,38 @@ public class FpvEye {
         GLES20.glEnableVertexAttribArray(mProgramColor);
         GLES20.glVertexAttribPointer(mProgramColor, 4, GLES20.GL_FLOAT, false, 0, 0);
 
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mTextCoord0BufferHandle);
-        GLES20.glEnableVertexAttribArray(mProgramTexCoord0);
-        GLES20.glVertexAttribPointer(mProgramTexCoord0, 2, GLES20.GL_FLOAT, false, 0, 0);
+        if(mRenderer.getChromaticAberrationCorrectionMode() == 2)
+        {
+            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mTextCoord0BufferHandle);
+            GLES20.glEnableVertexAttribArray(mProgramTexCoord0);
+            GLES20.glVertexAttribPointer(mProgramTexCoord0, 2, GLES20.GL_FLOAT, false, 0, 0);
 
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mTextCoord1BufferHandle);
-        GLES20.glEnableVertexAttribArray(mProgramTexCoord1);
-        GLES20.glVertexAttribPointer(mProgramTexCoord1, 2, GLES20.GL_FLOAT, false, 0, 0);
+            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mTextCoord1BufferHandle);
+            GLES20.glEnableVertexAttribArray(mProgramTexCoord1);
+            GLES20.glVertexAttribPointer(mProgramTexCoord1, 2, GLES20.GL_FLOAT, false, 0, 0);
 
 
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mTextCoord2BufferHandle);
-        GLES20.glEnableVertexAttribArray(mProgramTexCoord2);
-        GLES20.glVertexAttribPointer(mProgramTexCoord2, 2, GLES20.GL_FLOAT, false, 0, 0);
+            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mTextCoord2BufferHandle);
+            GLES20.glEnableVertexAttribArray(mProgramTexCoord2);
+            GLES20.glVertexAttribPointer(mProgramTexCoord2, 2, GLES20.GL_FLOAT, false, 0, 0);
+
+        }
+        else
+        {
+            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mTextCoord1BufferHandle);
+            GLES20.glEnableVertexAttribArray(mProgramTexCoord0);
+            GLES20.glVertexAttribPointer(mProgramTexCoord0, 2, GLES20.GL_FLOAT, false, 0, 0);
+
+            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mTextCoord1BufferHandle);
+            GLES20.glEnableVertexAttribArray(mProgramTexCoord1);
+            GLES20.glVertexAttribPointer(mProgramTexCoord1, 2, GLES20.GL_FLOAT, false, 0, 0);
+
+
+            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mTextCoord1BufferHandle);
+            GLES20.glEnableVertexAttribArray(mProgramTexCoord2);
+            GLES20.glVertexAttribPointer(mProgramTexCoord2, 2, GLES20.GL_FLOAT, false, 0, 0);
+        }
+
 
         //GLES20.glUniform2f(mProgramEyeToSourceUVScale, 2f, 2f);
 
@@ -305,8 +329,9 @@ public class FpvEye {
         }
 
 
+        GLES20.glUniform2f(mProgramEyeToSourceUVOffset, mRenderer.getPanH() ,mRenderer.getPanV() );
 
-        if(mRenderer.isChromaticAberrationCorrection())
+        if(mRenderer.getChromaticAberrationCorrectionMode() == 1)
         {
             GLES20.glUniform1i(mProgramChromaticAberrationCorrection, 1);
         }
@@ -326,8 +351,6 @@ public class FpvEye {
 
         GLES20.glUniform2f(mProgramEyeToSourceScale, 2.f / mRenderer.getMetricsWidth(), 2.f / mRenderer.getMetricsHeight());
         GLES20.glUniform2f(mProgramEyeToSourceOffset, 2.0f * mEyeOffsetX / mRenderer.getMetricsWidth(), 2.0f * mEyeOffsetY / mRenderer.getMetricsHeight());
-
-
 
 
 

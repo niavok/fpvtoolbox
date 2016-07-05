@@ -3,8 +3,9 @@ package com.parrot.fpvtoolbox;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
-import android.os.AsyncTask;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -22,12 +23,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.VideoView;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -38,13 +37,15 @@ public class FpvToolBox extends AppCompatActivity
 
     private static final String TAG = "FpvToolBox";
     private static final float DEFAULT_IPD = 63.0f;
-    private static final float DEFAULT_SCALE = 0.75f;
+    private static final float DEFAULT_SCALE = 1.0f;
     private static final float DEFAULT_PAN_H = 0.0f;
     private static final float DEFAULT_PAN_V = 0.0f;
 
     private static final float PAN_DEAD_ZONE = 0.01f;
     private static final float PAN_MAX_SPEED = 10f;
     private static final float PAN_MAX_OFFSET = 50f;
+
+    private static final int DEFAULT_CHROMATIC_ABERRATION_CORRECTION_MODE = 2;
 
 
     private FpvGLSurfaceView mGLView;
@@ -58,7 +59,7 @@ public class FpvToolBox extends AppCompatActivity
     boolean mIsFinished = false;
     ArrayList<FpvScene> mScenes;
     private long mLastDate = 0;
-    private boolean mChromaticAberrationCorrection = true;
+    private int mChromaticAberrationCorrection = DEFAULT_CHROMATIC_ABERRATION_CORRECTION_MODE;
     private boolean mDistortionCorrection = true;
     private boolean mLensLimits = false;
     private int mCurrentSceneIndex = 1;
@@ -72,67 +73,31 @@ public class FpvToolBox extends AppCompatActivity
     private Handler mPanHandler;
     private float mPanH = DEFAULT_PAN_H;
     private float mPanV = DEFAULT_PAN_V;
+    private ImageView mImageView;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fpv_tool_box);
-        //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        //setSupportActionBar(toolbar);
-
-        /*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });*/
-
-        /*requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);*/
-
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        /*ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);*/
-        //drawer.setDrawerListener(toggle);
-        //toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        mScenes = new ArrayList<FpvScene>();
-        mScenes.add(new FpvScene("Grid", "http://niavok.com/fpv/grid.html", FpvScene.SceneType.WEB, "1000 px x 1000 px picture"));
-        mScenes.add(new FpvScene("Avatar", Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)+ "/h264_dts_avatar.1080p-sample.mkv", FpvScene.SceneType.VIDEO, "1080p"));
-        mScenes.add(new FpvScene("Bebop 2", Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)+ "/Bebop_2_2016-05-15T152815+0200_5E885D.mp4", FpvScene.SceneType.VIDEO, "720p recording video"));
-        mScenes.add(new FpvScene("Tears of  steel", Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)+ "/tears_of_steel_720p.mov", FpvScene.SceneType.VIDEO, "720p"));
-        mScenes.add(new FpvScene("Tears of  steel", Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)+ "/tears_of_steel_1080p.mov", FpvScene.SceneType.VIDEO, "1080p"));
-        mScenes.add(new FpvScene("Big Buck Bunny",  Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)+ "/mov_bbb.mp4", FpvScene.SceneType.VIDEO, "320 px x 176 px video"));
-        mScenes.add(new FpvScene("The Shire", "http://niavok.com/fpv/lotr.html", FpvScene.SceneType.WEB, "1620 px x 1080 px picture"));
-        mScenes.add(new FpvScene("SSME", "http://niavok.com/fpv/ssme.html", FpvScene.SceneType.WEB, "1080 px x 1350 px picture"));
-        mScenes.add(new FpvScene("Parrots", "http://niavok.com/fpv/parrot.html", FpvScene.SceneType.WEB, "1080p"));
-
-
-
-
         // Create a GLSurfaceView instance and set it
         // as the ContentView for this Activity.
-
         mGLVideoView = (FpvGLSurfaceView) findViewById(R.id.gl_video_surface);
 
         mGLView = (FpvGLSurfaceView) findViewById(R.id.gl_surface);
         mNotificationTextView = (TextView) findViewById(R.id.notification_text);
         mNotificationSubTextView = (TextView) findViewById(R.id.notification_subtext);
-        //setContentView(mGLView);
 
 
         mWebView = (WebView) findViewById(R.id.web_view);
         mWebView.getSettings().setJavaScriptEnabled(true);
-        //mWebView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-
+        mImageView = (ImageView) findViewById(R.id.image_view);
 
         mGLLinearLayout = (GLRelativeLayout) findViewById(R.id.gl_layout);
         mGLView.SetRootView(mGLLinearLayout);
@@ -160,12 +125,9 @@ public class FpvToolBox extends AppCompatActivity
             public void run() {
                 mNotificationTextView.setText("");
                 mNotificationSubTextView.setText("");
-             //   mGLLinearLayout.invalidate();
             }
         };
         mNotificationHandler.postDelayed(runnable, 2000);
-        //mGLLinearLayout.invalidate();
-
     }
 
 
@@ -209,7 +171,7 @@ public class FpvToolBox extends AppCompatActivity
 
         setChromaticAberrationCorrect(mChromaticAberrationCorrection);
         setDistortionCorrection(mDistortionCorrection);
-        setChromaticAberrationCorrect(mChromaticAberrationCorrection);
+
 
 
         Runnable runnable = new Runnable() {
@@ -258,13 +220,9 @@ public class FpvToolBox extends AppCompatActivity
     private void generateScenes() {
 
         mScenes = new ArrayList<FpvScene>();
-        mScenes.add(new FpvScene("Grid", "http://niavok.com/fpv/grid.html", FpvScene.SceneType.WEB, "1000 px x 1000 px picture"));
 
         generateVideoScenes();
-
-        mScenes.add(new FpvScene("The Shire", "http://niavok.com/fpv/lotr.html", FpvScene.SceneType.WEB, "1620 px x 1080 px picture"));
-        mScenes.add(new FpvScene("SSME", "http://niavok.com/fpv/ssme.html", FpvScene.SceneType.WEB, "1080 px x 1350 px picture"));
-        mScenes.add(new FpvScene("Parrots", "http://niavok.com/fpv/parrot.html", FpvScene.SceneType.WEB, "1080p"));
+        generateImageScenes();
 
         if(mCurrentSceneIndex >= mScenes.size())
         {
@@ -306,6 +264,42 @@ public class FpvToolBox extends AppCompatActivity
             }
         }
     }
+
+    private void generateImageScenes() {
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    0);
+        } else {
+            File imagesPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+
+
+            if(imagesPath.exists()) {
+
+                File[] fileList = imagesPath.listFiles();
+                Arrays.sort(fileList);
+                for(File imageFile : fileList) {
+
+                    Log.e("Plop", "Analyse image "+imageFile.getName());
+
+                    String pickedImagePath = "path/of/the/selected/file";
+                    BitmapFactory.Options bitMapOption=new BitmapFactory.Options();
+                    bitMapOption.inJustDecodeBounds=true;
+                    BitmapFactory.decodeFile(imageFile.getAbsolutePath(), bitMapOption);
+
+                    if(bitMapOption.outWidth != -1) {
+                        int width = bitMapOption.outWidth;
+                        int height = bitMapOption.outHeight;
+                        mScenes.add(new FpvScene(imageFile.getName(), imageFile.getAbsolutePath(), FpvScene.SceneType.IMAGE, "" + width + " px x " + height + " px image"));
+                    }
+                }
+            }
+        }
+    }
+
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
@@ -400,6 +394,19 @@ public class FpvToolBox extends AppCompatActivity
         return super.dispatchGenericMotionEvent(ev);
     }
 
+
+    public void enableWeb(String url) {
+        disableAll();
+        mWebView.loadUrl(url);
+        mWebView.setVisibility(View.VISIBLE);
+    }
+
+    public void enableImage(String url) {
+        disableAll();
+        mImageView.setVisibility(View.VISIBLE);
+        mImageView.setImageURI(Uri.parse(url));
+        mImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+    }
     public void enableVideo(String url)
     {
        // ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
@@ -412,17 +419,18 @@ public class FpvToolBox extends AppCompatActivity
                         new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                         0);
         } else {
-            mWebView.setVisibility(View.INVISIBLE);
+            disableAll();
             mGLVideoView.setVisibility(View.VISIBLE);
             mGLVideoView.getRenderer().enableVideo(getApplicationContext(), url);
         }
     }
 
-    public void disableVideo()
+    public void disableAll()
     {
         mGLVideoView.setVisibility(View.INVISIBLE);
         mGLVideoView.getRenderer().disableVideo();
-        mWebView.setVisibility(View.VISIBLE);
+        mWebView.setVisibility(View.INVISIBLE);
+        mImageView.setVisibility(View.INVISIBLE);
     }
 
     private void reload() {
@@ -430,7 +438,7 @@ public class FpvToolBox extends AppCompatActivity
     }
 
     private void resetSettings() {
-        mChromaticAberrationCorrection = true;
+        mChromaticAberrationCorrection = DEFAULT_CHROMATIC_ABERRATION_CORRECTION_MODE;
         mDistortionCorrection = true;
         mLensLimits = false;
 
@@ -494,11 +502,8 @@ public class FpvToolBox extends AppCompatActivity
         {
             String url = mScenes.get(mCurrentSceneIndex).getUrl();
             Log.e("plop","updateScene : "+ url);
-            disableVideo();
+            enableWeb(url);
 
-
-
-            mWebView.loadUrl(url);
             mGLLinearLayout.invalidate();
         }
         else if(mScenes.get(mCurrentSceneIndex).getType() == FpvScene.SceneType.VIDEO)
@@ -508,13 +513,42 @@ public class FpvToolBox extends AppCompatActivity
 
             enableVideo(url);
         }
+        else if(mScenes.get(mCurrentSceneIndex).getType() == FpvScene.SceneType.IMAGE)
+        {
+            String url = mScenes.get(mCurrentSceneIndex).getUrl();
+            Log.e("plop","updateScene image : "+ url);
+
+            enableImage(url);
+        }
         sendNotification("Scene: "+mScenes.get(mCurrentSceneIndex).getName(), mScenes.get(mCurrentSceneIndex).getSubtitle());
 
     }
 
     private void toogleChromaticAberrationCorrection() {
-        setChromaticAberrationCorrect(!mChromaticAberrationCorrection);
-        sendNotification("Chromatic aberration correction: "+(mChromaticAberrationCorrection ? "ON" : "OFF"));
+
+        if(mChromaticAberrationCorrection == 2)
+        {
+            setChromaticAberrationCorrect(0);
+        }
+        else
+        {
+            setChromaticAberrationCorrect(mChromaticAberrationCorrection+1);
+        }
+
+        String mode = "Unknown";
+        switch (mChromaticAberrationCorrection)
+        {
+            case 0:
+                mode = "OFF";
+            break;
+            case 1:
+                mode = "OLD";
+                break;
+            case 2:
+                mode = "NEW";
+                break;
+        }
+        sendNotification("Chromatic aberration correction: "+mode);
     }
 
     private void toogleLensLimits() {
@@ -539,7 +573,7 @@ public class FpvToolBox extends AppCompatActivity
     @Override
     public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
         outState.putInt("currentSceneIndex", mCurrentSceneIndex);
-        outState.putBoolean("chromaticAberrationCorrection", mChromaticAberrationCorrection);
+        outState.putInt("chromaticAberrationCorrection", mChromaticAberrationCorrection);
         outState.putBoolean("lensLimits", mLensLimits);
         outState.putBoolean("distortionCorrection", mDistortionCorrection);
         outState.putDouble("viewScale", mViewScale);
@@ -559,7 +593,7 @@ public class FpvToolBox extends AppCompatActivity
 
         if(savedInstanceState.containsKey("chromaticAberrationCorrection"))
         {
-            mChromaticAberrationCorrection = savedInstanceState.getBoolean("chromaticAberrationCorrection", true);
+            mChromaticAberrationCorrection = savedInstanceState.getInt("chromaticAberrationCorrection", DEFAULT_CHROMATIC_ABERRATION_CORRECTION_MODE);
         }
 
         if(savedInstanceState.containsKey("chromaticAberrationCorrection"))
@@ -683,7 +717,7 @@ public class FpvToolBox extends AppCompatActivity
     }
 
 
-    public void setChromaticAberrationCorrect(boolean chromaticAberrationCorrection) {
+    public void setChromaticAberrationCorrect(int chromaticAberrationCorrection) {
         mChromaticAberrationCorrection = chromaticAberrationCorrection;
         mGLView.getRenderer().setChromaticAberrationCorrect(mChromaticAberrationCorrection);
         mGLVideoView.getRenderer().setChromaticAberrationCorrect(mChromaticAberrationCorrection);

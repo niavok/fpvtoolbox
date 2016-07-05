@@ -45,7 +45,7 @@ public class FpvGLRenderer  extends ViewToGLRenderer {
     private float mMetricsWidth; // In millimeters
     private float mMetricsHeight; // In millimeters
     private View mRootView;
-    private boolean mChromaticAberrationCorrection = true;
+    private int mChromaticAberrationCorrection = 0;
     private boolean mDistortionCorrection = true;
     private boolean mForceRedraw = false;
     private float mViewScale;
@@ -71,11 +71,13 @@ public class FpvGLRenderer  extends ViewToGLRenderer {
                     IntBuffer indices = LoadIntBuffer("indices");
                     FloatBuffer colors = LoadFloatBuffer("colors");
                     FloatBuffer positions = LoadFloatBuffer("positions");
-                    FloatBuffer texCoords = LoadFloatBuffer("tex_coords");
+                    FloatBuffer texCoordsRed = LoadFloatBuffer("tex_coords_red");
+                    FloatBuffer texCoordsGreen = LoadFloatBuffer("tex_coords_green");
+                    FloatBuffer texCoordsBlue = LoadFloatBuffer("tex_coords_blue");
 
                     // TODO : don't duplicate array loading in gpu memory
-                    mLeftEye = new FpvEye(this, mEyeProgram, indices, positions, colors, texCoords);
-                    mRightEye = new FpvEye(this, mEyeProgram, indices, positions, colors, texCoords);
+                    mLeftEye = new FpvEye(this, mEyeProgram, indices, positions, colors, texCoordsRed, texCoordsGreen, texCoordsBlue);
+                    mRightEye = new FpvEye(this, mEyeProgram, indices, positions, colors, texCoordsRed, texCoordsGreen, texCoordsBlue);
                 }
                 // No distortion correction
                 {
@@ -85,8 +87,8 @@ public class FpvGLRenderer  extends ViewToGLRenderer {
                     FloatBuffer texCoords = LoadFloatBuffer("tex_coords_no_dc");
 
                     // TODO : don't duplicate array loading in gpu memory
-                    mLeftEyeNoDistortionCorrection = new FpvEye(this, mEyeProgram, indices, positions, colors, texCoords);
-                    mRightEyeNoDistortionCorrection = new FpvEye(this, mEyeProgram, indices, positions, colors, texCoords);
+                    mLeftEyeNoDistortionCorrection = new FpvEye(this, mEyeProgram, indices, positions, colors, texCoords, texCoords, texCoords);
+                    mRightEyeNoDistortionCorrection = new FpvEye(this, mEyeProgram, indices, positions, colors, texCoords, texCoords, texCoords);
                 }
                 setupEyes();
             }
@@ -404,12 +406,12 @@ public class FpvGLRenderer  extends ViewToGLRenderer {
         mRootView = rootView;
     }
 
-    public void setChromaticAberrationCorrect(boolean chromaticAberrationCorrection) {
+    public void setChromaticAberrationCorrect(int chromaticAberrationCorrection) {
 
         mChromaticAberrationCorrection = chromaticAberrationCorrection;
     }
 
-    public boolean isChromaticAberrationCorrection() {
+    public int getChromaticAberrationCorrectionMode() {
         return mChromaticAberrationCorrection;
     }
 

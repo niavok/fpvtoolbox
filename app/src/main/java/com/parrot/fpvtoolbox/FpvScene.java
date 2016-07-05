@@ -8,6 +8,7 @@ public class FpvScene {
     enum SceneType
     {
         WEB,
+        IMAGE,
         VIDEO,
     }
 
