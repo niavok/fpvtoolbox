@@ -52,10 +52,12 @@ public class FpvGLRenderer  extends ViewToGLRenderer {
     private boolean mShowLensLimits;
     private int mPixelWidth;
     private int mPixelHeight;
+    private FpvGLSurfaceView mSurfaceView;
 
 
-    public FpvGLRenderer(Context context) {
 
+    public FpvGLRenderer(Context context, FpvGLSurfaceView surfaceView) {
+        super(surfaceView);
         mContext = context;
     }
 

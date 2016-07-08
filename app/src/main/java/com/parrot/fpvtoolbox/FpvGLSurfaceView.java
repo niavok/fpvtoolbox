@@ -29,11 +29,11 @@ public class FpvGLSurfaceView extends GLSurfaceView {
 
 
         setEGLConfigChooser(8, 8, 8, 8, 16, 0);
-        mRenderer = new FpvGLRenderer(getContext());
+        mRenderer = new FpvGLRenderer(getContext(), this);
 
         // Set the Renderer for drawing on the GLSurfaceView
         setRenderer(mRenderer);
-        //setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 
 
     }

@@ -10,6 +10,7 @@ import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
 import android.util.Log;
 import android.view.Surface;
+import android.view.SurfaceView;
 
 import java.io.IOException;
 
@@ -37,6 +38,12 @@ public class ViewToGLRenderer implements GLSurfaceView.Renderer {
     protected MediaPlayer mVideoPlayer;
     private int mVideoWidth;
     private int mVideoHeight;
+    private GLSurfaceView mSurfaceView;
+
+    public ViewToGLRenderer(GLSurfaceView surfaceView) {
+
+        mSurfaceView = surfaceView;
+    }
 
 
     @Override
@@ -87,6 +94,13 @@ public class ViewToGLRenderer implements GLSurfaceView.Renderer {
             //attach the texture to a surface.
             //It's a clue class for rendering an android view to gl level
             mSurfaceTexture = new SurfaceTexture(mGlSurfaceTexture);
+            mSurfaceTexture.setOnFrameAvailableListener(new SurfaceTexture.OnFrameAvailableListener() {
+                @Override
+                public void onFrameAvailable(SurfaceTexture surfaceTexture) {
+                    mSurfaceView.requestRender();
+
+                }
+            });
             Log.e("ViewToGLRenderer", "onSurfaceChanged mTextureWidth"+mTextureWidth + " mTextureHeight="+mTextureHeight);
             mSurfaceTexture.setDefaultBufferSize(mTextureWidth, mTextureHeight);
             mSurface = new Surface(mSurfaceTexture);
