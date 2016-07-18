@@ -23,6 +23,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ImageView;
@@ -37,7 +38,7 @@ public class FpvToolBox extends AppCompatActivity
 
     private static final String TAG = "FpvToolBox";
     private static final float DEFAULT_IPD = 63.0f;
-    private static final float DEFAULT_SCALE = 1.0f;
+    private static final float DEFAULT_SCALE = 0.75f;
     private static final float DEFAULT_PAN_H = 0.0f;
     private static final float DEFAULT_PAN_V = 0.0f;
 
@@ -62,7 +63,7 @@ public class FpvToolBox extends AppCompatActivity
     private int mChromaticAberrationCorrection = DEFAULT_CHROMATIC_ABERRATION_CORRECTION_MODE;
     private boolean mDistortionCorrection = true;
     private boolean mLensLimits = false;
-    private int mCurrentSceneIndex = 1;
+    private int mCurrentSceneIndex = 0;
     private TextView mNotificationTextView;
     private TextView mNotificationSubTextView;
     private Handler mNotificationHandler;
@@ -139,6 +140,9 @@ public class FpvToolBox extends AppCompatActivity
 
         generateScenes();
 
+        WindowManager.LayoutParams layout = getWindow().getAttributes();
+        layout.screenBrightness = 1F;
+        getWindow().setAttributes(layout);
 
         updateScene();
         setViewScale(mViewScale);
@@ -249,6 +253,12 @@ public class FpvToolBox extends AppCompatActivity
                 for(File videoFile : fileList) {
 
                     Log.e("Plop", "Analyse video "+videoFile.getName());
+
+                    if(videoFile.isDirectory())
+                    {
+                        continue;
+                    }
+
                     MediaMetadataRetriever metaRetriever = new MediaMetadataRetriever();
                     metaRetriever.setDataSource(videoFile.getAbsolutePath());
                     if(metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_VIDEO) != null)
@@ -282,6 +292,12 @@ public class FpvToolBox extends AppCompatActivity
                 File[] fileList = imagesPath.listFiles();
                 Arrays.sort(fileList);
                 for(File imageFile : fileList) {
+
+
+                    if(imageFile.isDirectory())
+                    {
+                        continue;
+                    }
 
                     Log.e("Plop", "Analyse image "+imageFile.getName());
 
@@ -498,6 +514,9 @@ public class FpvToolBox extends AppCompatActivity
 
     private void updateScene()
     {
+        Log.e("plop","mScenes.size() " +mScenes.size());
+        Log.e("plop","mCurrentSceneIndex " + mCurrentSceneIndex);
+
         if(mScenes.get(mCurrentSceneIndex).getType() == FpvScene.SceneType.WEB)
         {
             String url = mScenes.get(mCurrentSceneIndex).getUrl();
