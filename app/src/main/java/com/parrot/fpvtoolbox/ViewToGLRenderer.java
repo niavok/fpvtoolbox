@@ -47,7 +47,7 @@ public class ViewToGLRenderer implements GLSurfaceView.Renderer {
 
 
     @Override
-    public void onDrawFrame(GL10 gl){
+    synchronized public void onDrawFrame(GL10 gl){
         synchronized (this){
             // update texture
             mSurfaceTexture.updateTexImage();
@@ -55,7 +55,7 @@ public class ViewToGLRenderer implements GLSurfaceView.Renderer {
         }
     }
 
-    public void enableVideo(Context context, String url)
+    synchronized public void enableVideo(Context context, String url)
     {
         disableVideo();
         Log.e("ViewToGLRenderer", "enableVideo "+ url);
@@ -65,9 +65,16 @@ public class ViewToGLRenderer implements GLSurfaceView.Renderer {
             mVideoPlayer.setSurface(mSurface);
             mVideoPlayer.setLooping(true);
 
-            mVideoPlayer.prepare();
-            mVideoWidth = mVideoPlayer.getVideoWidth();
-            mVideoHeight = mVideoPlayer.getVideoHeight();
+            try {
+                mVideoPlayer.prepare();
+                mVideoWidth = mVideoPlayer.getVideoWidth();
+                mVideoHeight = mVideoPlayer.getVideoHeight();
+            } catch (IllegalStateException e)
+            {
+                e.printStackTrace();
+            }
+
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -75,7 +82,7 @@ public class ViewToGLRenderer implements GLSurfaceView.Renderer {
 
     }
 
-    public void disableVideo()
+    synchronized  public void disableVideo()
     {
         Log.e("ViewToGLRenderer", "disableVideo");
         if(mVideoPlayer != null) {
@@ -86,7 +93,7 @@ public class ViewToGLRenderer implements GLSurfaceView.Renderer {
     }
 
     @Override
-    public void onSurfaceChanged(GL10 gl, int width, int height){
+    synchronized public void onSurfaceChanged(GL10 gl, int width, int height){
         releaseSurface();
 
         mGlSurfaceTexture = createTexture();
@@ -110,7 +117,7 @@ public class ViewToGLRenderer implements GLSurfaceView.Renderer {
         }
     }
 
-    public void releaseSurface(){
+    synchronized public void releaseSurface(){
         if(mSurface != null){
             mSurface.release();
         }
