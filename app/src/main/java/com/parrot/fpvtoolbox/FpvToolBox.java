@@ -77,7 +77,6 @@ public class FpvToolBox extends AppCompatActivity
     private ImageView mImageView;
     private InactivityDetector mInactivityDetector;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -112,17 +111,24 @@ public class FpvToolBox extends AppCompatActivity
         mInactivityDetector.registerListener(new InactitityListener() {
             @Override
             public void OnActive() {
+                Log.i(TAG, "Activate");
                 reload();
-                // TODO take screen lock
+                activate();
             }
 
             @Override
             public void OnInactive() {
+                Log.i(TAG, "Deactivate");
                 disableAll();
-                // TODO release screen lock
+                deactivate();
             }
         });
 
+
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD|
+                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
+                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON |
+                WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
     }
 
     private void sendNotification(String text)
@@ -146,19 +152,14 @@ public class FpvToolBox extends AppCompatActivity
         mNotificationHandler.postDelayed(runnable, 2000);
     }
 
-
     @Override
     protected void onResume() {
         super.onResume();
-        Log.e("plop", "on resume");
-
+        Log.i(TAG, "on resume");
 
         mInactivityDetector.enable();
+        activate();
         generateScenes();
-
-        WindowManager.LayoutParams layout = getWindow().getAttributes();
-        layout.screenBrightness = 1F;
-        getWindow().setAttributes(layout);
 
         updateScene();
         setViewScale(mViewScale);
@@ -207,10 +208,25 @@ public class FpvToolBox extends AppCompatActivity
 
     }
 
+    private void activate() {
+        WindowManager.LayoutParams layout = getWindow().getAttributes();
+        layout.screenBrightness = 1F;
+        getWindow().setAttributes(layout);
+    }
+
+    private void deactivate() {
+        WindowManager.LayoutParams layout = getWindow().getAttributes();
+        layout.screenBrightness = 0F;
+        getWindow().setAttributes(layout);
+    }
+
     @Override
     protected void onPause() {
+        Log.i(TAG, "on pause");
         mPanHandler.removeCallbacksAndMessages(null);
         mInactivityDetector.disable();
+
+
         super.onPause();
     }
 

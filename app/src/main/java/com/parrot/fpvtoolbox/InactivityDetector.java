@@ -8,7 +8,7 @@ import android.hardware.SensorManager;
 
 public class InactivityDetector {
 
-    private static final long INACTIVITY_THRESOLD_RATIO = 5000;
+    private static final double INACTIVITY_THRESOLD_RATIO = 0.2;
     private static final long ACTIVITY_THRESOLD_MS = 500;
     public static final double MOTION_DETECTION_THRESOLD = 0.07;
     public static final double ANGLE_CONVERGENCE_SPEED = 0.1;
