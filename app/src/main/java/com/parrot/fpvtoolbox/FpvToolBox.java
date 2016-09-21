@@ -75,6 +75,7 @@ public class FpvToolBox extends AppCompatActivity
     private float mPanH = DEFAULT_PAN_H;
     private float mPanV = DEFAULT_PAN_V;
     private ImageView mImageView;
+    private InactivityDetector mInactivityDetector;
 
 
     @Override
@@ -107,6 +108,20 @@ public class FpvToolBox extends AppCompatActivity
         mNotificationHandler = new Handler();
         mPanHandler = new Handler();
 
+        mInactivityDetector = new InactivityDetector(this);
+        mInactivityDetector.registerListener(new InactitityListener() {
+            @Override
+            public void OnActive() {
+                reload();
+                // TODO take screen lock
+            }
+
+            @Override
+            public void OnInactive() {
+                disableAll();
+                // TODO release screen lock
+            }
+        });
 
     }
 
@@ -138,6 +153,7 @@ public class FpvToolBox extends AppCompatActivity
         Log.e("plop", "on resume");
 
 
+        mInactivityDetector.enable();
         generateScenes();
 
         WindowManager.LayoutParams layout = getWindow().getAttributes();
@@ -194,6 +210,7 @@ public class FpvToolBox extends AppCompatActivity
     @Override
     protected void onPause() {
         mPanHandler.removeCallbacksAndMessages(null);
+        mInactivityDetector.disable();
         super.onPause();
     }
 
@@ -322,6 +339,7 @@ public class FpvToolBox extends AppCompatActivity
         boolean handled = false;
         Log.e("plop","dispatchKeyEvent "+ event.toString());
 
+        mInactivityDetector.activate();
 
         if ((event.getSource() & InputDevice.SOURCE_GAMEPAD)
                 == InputDevice.SOURCE_GAMEPAD) {
@@ -392,6 +410,8 @@ public class FpvToolBox extends AppCompatActivity
     public boolean dispatchGenericMotionEvent(MotionEvent ev) {
         mHPanCommand = ev.getAxisValue(MotionEvent.AXIS_Z);
         mVPanCommand = ev.getAxisValue(MotionEvent.AXIS_RZ);
+
+        mInactivityDetector.activate();
 
         /*Log.e("plop","dispatchGenericMotionEvent "+ ev.toString());
         Log.e("plop","getAction "+ ev.getAction());
