@@ -11,12 +11,7 @@
             <option value="/mnt/workspace/fred/AndroidStudioProjects/FPVToolbox/app" />
           </set>
         </option>
-        <option name="myModules">
-          <set>
-            <option value="/mnt/workspace/fred/AndroidStudioProjects/FPVToolbox" />
-            <option value="/mnt/workspace/fred/AndroidStudioProjects/FPVToolbox/app" />
-          </set>
-        </option>
+        <option name="resolveModulePerSourceSet" value="false" />
       </GradleProjectSettings>
     </option>
   </component>
