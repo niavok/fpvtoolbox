@@ -18,4 +18,11 @@ Swipe at the left of the screen to show the interaction menu. The bluetooth cont
 
 ## Example
 
-![FPV Toolbox playing a video](https://raw.githubusercontent.com/niavok/fpvtoolbox/master/fpv_toolbox.png)
+Playing a video
+![FPV Toolbox playing a video](https://raw.githubusercontent.com/niavok/fpvtoolbox/master/screenshots/fpv_toolbox.png)
+
+Side menu
+![FPV Toolbox side menu](https://raw.githubusercontent.com/niavok/fpvtoolbox/master/screenshots/fpv_toolbox_side.png)
+
+Settings menu
+![FPV Toolbox settings](https://raw.githubusercontent.com/niavok/fpvtoolbox/master/screenshots/fpv_toolbox_settings.png)
