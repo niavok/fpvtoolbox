@@ -660,6 +660,19 @@ public class FpvToolBox extends AppCompatActivity
 
     private void updateScene()
     {
+        if(mCurrentSceneIndex > mScenes.size())
+        {
+            if(mScenes.size() > 0) {
+                mCurrentSceneIndex = mScenes.size() -1;
+            }
+            else
+            {
+                // No media, don't update scene
+                mCurrentSceneIndex = 0;
+                return;
+            }
+
+        }
         if(mScenes.get(mCurrentSceneIndex).getType() == FpvScene.SceneType.WEB)
         {
             String url = mScenes.get(mCurrentSceneIndex).getUrl();
