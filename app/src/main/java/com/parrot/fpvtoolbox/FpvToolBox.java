@@ -1,6 +1,7 @@
 package com.parrot.fpvtoolbox;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -27,6 +28,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -48,7 +50,9 @@ public class FpvToolBox extends AppCompatActivity
     private static final float PAN_MAX_OFFSET = 50f;
 
     private static final int DEFAULT_CHROMATIC_ABERRATION_CORRECTION_MODE = 2;
-    private static final String PREFS_NAME = "FpvToolvoxPrefs";
+    public static final String PREFS_NAME = "FpvToolvoxPrefs";
+    public static final boolean DEFAULT_DEMO_MODE = false;
+    public static final boolean DEFAULT_POWER_SAVE = true;
 
 
     // Settings
@@ -60,6 +64,8 @@ public class FpvToolBox extends AppCompatActivity
     private float mIpd = DEFAULT_IPD;
     private float mPanH = DEFAULT_PAN_H;
     private float mPanV = DEFAULT_PAN_V;
+    private boolean mDemoMode = DEFAULT_DEMO_MODE;
+    private boolean mPowerSave = DEFAULT_POWER_SAVE;
 
     private FpvGLSurfaceView mGLView;
     private FpvGLSurfaceView mGLVideoView;
@@ -111,20 +117,36 @@ public class FpvToolBox extends AppCompatActivity
         mNotificationHandler = new Handler();
         mPanHandler = new Handler();
 
+
+        View navigationHeader = navigationView.inflateHeaderView(R.layout.nav_header_fpv_tool_box);
+
+        Button settingButton = (Button) navigationHeader.findViewById(R.id.settingsButton);
+        settingButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(FpvToolBox.this, SettingsActivity.class);
+                startActivity(intent);
+            }
+        });
+
         mInactivityDetector = new InactivityDetector(this);
         mInactivityDetector.registerListener(new InactitityListener() {
             @Override
             public void OnActive() {
-                Log.i(TAG, "Activate");
-                reload();
-                activate();
+                if (mPowerSave) {
+                    Log.i(TAG, "Activate");
+                    reload();
+                    activate();
+                }
             }
 
             @Override
             public void OnInactive() {
-                Log.i(TAG, "Deactivate");
-                disableAll();
-                deactivate();
+                if (mPowerSave) {
+                    Log.i(TAG, "Deactivate");
+                    disableAll();
+                    deactivate();
+                }
             }
         });
 
@@ -224,6 +246,9 @@ public class FpvToolBox extends AppCompatActivity
         mIpd = settings.getFloat("ipd", DEFAULT_IPD);
         mPanH = settings.getFloat("panH", DEFAULT_PAN_H);
         mPanV = settings.getFloat("panV", DEFAULT_PAN_V);
+
+        mDemoMode = settings.getBoolean("demoMode", DEFAULT_DEMO_MODE);
+        mPowerSave = settings.getBoolean("powerSave", DEFAULT_POWER_SAVE);
     }
 
     private void saveSettings() {
@@ -612,8 +637,9 @@ public class FpvToolBox extends AppCompatActivity
 
             enableImage(url);
         }
-        sendNotification("Scene: "+mScenes.get(mCurrentSceneIndex).getName(), mScenes.get(mCurrentSceneIndex).getSubtitle());
-
+        if(!mDemoMode) {
+            sendNotification("Scene: " + mScenes.get(mCurrentSceneIndex).getName(), mScenes.get(mCurrentSceneIndex).getSubtitle());
+        }
     }
 
     private void toogleChromaticAberrationCorrection() {
