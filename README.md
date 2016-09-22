@@ -16,3 +16,6 @@ First, accept the file acces autorisations. The app will look for video and imag
 
 Swipe at the left of the screen to show the interaction menu. The bluetooth controller keybiding are shown here.
 
+## Example
+
+![FPV Toolbox playing a video](https://raw.githubusercontent.com/niavok/fpvtoolbox/master/fpv_toolbox.png)
