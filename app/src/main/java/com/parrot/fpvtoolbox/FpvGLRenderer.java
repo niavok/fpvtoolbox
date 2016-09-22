@@ -28,9 +28,8 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class FpvGLRenderer  extends ViewToGLRenderer {
     private static final String TAG = "FpvGLRenderer";
+    private static final float HMD_OFFSET = 34.66f;
 
-    private Triangle mTriangle;
-    private Square   mSquare;
     private Context mContext;
     private int mEyeProgram;
     private FpvEye mLeftEye = null;
@@ -50,10 +49,7 @@ public class FpvGLRenderer  extends ViewToGLRenderer {
     private boolean mForceRedraw = false;
     private float mViewScale;
     private boolean mShowLensLimits;
-    private int mPixelWidth;
-    private int mPixelHeight;
-    private FpvGLSurfaceView mSurfaceView;
-
+    private float mDeviceMargin;
 
 
     public FpvGLRenderer(Context context, FpvGLSurfaceView surfaceView) {
@@ -183,11 +179,13 @@ public class FpvGLRenderer  extends ViewToGLRenderer {
     }
 
     private void setupEyes() {
+        float yOffset = HMD_OFFSET - mDeviceMargin;
+
         if(mLeftEye != null) {
             mLeftEye.setEyeWidth(mEyeSize);
             mLeftEye.setEyeHeight(mEyeSize);
             mLeftEye.setEyeOffsetX(-mIpd / 2);
-           // mLeftEye.setEyeOffsetY(mPanV);
+            mLeftEye.setEyeOffsetY(yOffset);
         }
 
 
@@ -195,14 +193,14 @@ public class FpvGLRenderer  extends ViewToGLRenderer {
             mRightEye.setEyeWidth(mEyeSize);
             mRightEye.setEyeHeight(mEyeSize);
             mRightEye.setEyeOffsetX(mIpd / 2);
-            //mRightEye.setEyeOffsetY(mPanV);
+            mRightEye.setEyeOffsetY(yOffset);
         }
 
         if(mLeftEyeNoDistortionCorrection != null) {
             mLeftEyeNoDistortionCorrection.setEyeWidth(mEyeSize);
             mLeftEyeNoDistortionCorrection.setEyeHeight(mEyeSize);
             mLeftEyeNoDistortionCorrection.setEyeOffsetX(-mIpd / 2);
-           // mLeftEyeNoDistortionCorrection.setEyeOffsetY(mPanV);
+            mLeftEyeNoDistortionCorrection.setEyeOffsetY(yOffset);
         }
 
 
@@ -210,7 +208,7 @@ public class FpvGLRenderer  extends ViewToGLRenderer {
             mRightEyeNoDistortionCorrection.setEyeWidth(mEyeSize);
             mRightEyeNoDistortionCorrection.setEyeHeight(mEyeSize);
             mRightEyeNoDistortionCorrection.setEyeOffsetX(mIpd / 2);
-           // mRightEyeNoDistortionCorrection.setEyeOffsetY(mPanV);
+            mRightEyeNoDistortionCorrection.setEyeOffsetY(yOffset);
         }
     }
 
@@ -297,8 +295,6 @@ public class FpvGLRenderer  extends ViewToGLRenderer {
     }
 
     public void onSurfaceChanged(GL10 gl, int width, int height) {
-        mPixelWidth = width;
-        mPixelHeight = height;
         super.onSurfaceChanged(gl, width, height);
         GLES20.glViewport(0, 0, width, height);
         Log.e("FpvGLRenderer", "onSurfaceChanged width=" + width + " height="+height);
@@ -437,6 +433,11 @@ public class FpvGLRenderer  extends ViewToGLRenderer {
 
     public float getViewScale() {
         return mViewScale;
+    }
+
+    public void setDeviceMargin(float deviceMargin) {
+        mDeviceMargin = deviceMargin;
+        setupEyes();
     }
 
     public void setDistortionCorrection(boolean distortionCorrection) {

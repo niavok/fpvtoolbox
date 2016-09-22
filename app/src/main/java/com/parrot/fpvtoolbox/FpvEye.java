@@ -350,9 +350,7 @@ public class FpvEye {
         }
 
         GLES20.glUniform2f(mProgramEyeToSourceScale, 2.f / mRenderer.getMetricsWidth(), 2.f / mRenderer.getMetricsHeight());
-        GLES20.glUniform2f(mProgramEyeToSourceOffset, 2.0f * mEyeOffsetX / mRenderer.getMetricsWidth(), 2.0f * mEyeOffsetY / mRenderer.getMetricsHeight());
-
-
+        GLES20.glUniform2f(mProgramEyeToSourceOffset, 2.0f * mEyeOffsetX / mRenderer.getMetricsWidth(), 2.0f * mEyeOffsetY / mRenderer.getMetricsHeight() - 1.0f);
 
         GLES20.glDrawElements(GLES20.GL_TRIANGLES, mIndicesBuffer.limit(), GLES20.GL_UNSIGNED_INT, 0);
 

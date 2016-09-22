@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -49,6 +50,8 @@ public class FpvToolBox extends AppCompatActivity
     private static final float PAN_MAX_SPEED = 10f;
     private static final float PAN_MAX_OFFSET = 50f;
 
+    private static final float DEFAULT_DEVICE_MARGIN = 4.0f;
+
     private static final int DEFAULT_CHROMATIC_ABERRATION_CORRECTION_MODE = 2;
     public static final String PREFS_NAME = "FpvToolvoxPrefs";
     public static final boolean DEFAULT_DEMO_MODE = false;
@@ -66,6 +69,7 @@ public class FpvToolBox extends AppCompatActivity
     private float mPanV = DEFAULT_PAN_V;
     private boolean mDemoMode = DEFAULT_DEMO_MODE;
     private boolean mPowerSave = DEFAULT_POWER_SAVE;
+    private float mDeviceMargin = DEFAULT_DEVICE_MARGIN; // In mm
 
     private FpvGLSurfaceView mGLView;
     private FpvGLSurfaceView mGLVideoView;
@@ -193,6 +197,7 @@ public class FpvToolBox extends AppCompatActivity
         setViewScale(mViewScale);
         setIpd(mIpd);
         setPan(mPanH, mPanV);
+        setDeviceMargin(mDeviceMargin);
 
         mWebView.setWebViewClient(new WebViewClient() {
 
@@ -246,9 +251,56 @@ public class FpvToolBox extends AppCompatActivity
         mIpd = settings.getFloat("ipd", DEFAULT_IPD);
         mPanH = settings.getFloat("panH", DEFAULT_PAN_H);
         mPanV = settings.getFloat("panV", DEFAULT_PAN_V);
+        mDeviceMargin = settings.getFloat("deviceMargin", getDefaultDeviceMargin());
 
         mDemoMode = settings.getBoolean("demoMode", DEFAULT_DEMO_MODE);
         mPowerSave = settings.getBoolean("powerSave", DEFAULT_POWER_SAVE);
+    }
+
+    private static String getDeviceName() {
+        String manufacturer = Build.MANUFACTURER;
+        String model = Build.MODEL;
+        if (model.startsWith(manufacturer)) {
+            return capitalize(model);
+        } else {
+            return capitalize(manufacturer) + " " + model;
+        }
+    }
+
+
+    private static String capitalize(String s) {
+        if (s == null || s.length() == 0) {
+            return "";
+        }
+        char first = s.charAt(0);
+        if (Character.isUpperCase(first)) {
+            return s;
+        } else {
+            return Character.toUpperCase(first) + s.substring(1);
+        }
+    }
+
+    public static float getDefaultDeviceMargin() {
+        String deviceName = getDeviceName();
+        String realName = null;
+        float margin = DEFAULT_DEVICE_MARGIN;
+
+        if (deviceName.equals("Samsung SM-G900F")) {
+            realName = "Galaxy S5";
+            margin = 4.0f;
+        } else if (deviceName.equals("LGE LG-H815")) {
+            realName = "LG G4";
+            margin = 5.0f;
+        }
+
+
+        if (realName != null) {
+            Log.i(TAG, realName+" detected. Margin: "+margin+"mm");
+        } else {
+            Log.w(TAG, "Unknown device model '"+deviceName+"'. Use fallback device margin: "+margin+"mm");
+        }
+
+        return margin;
     }
 
     private void saveSettings() {
@@ -879,5 +931,12 @@ public class FpvToolBox extends AppCompatActivity
 
         mGLView.getRenderer().setPan(mPanH, mPanV);
         mGLVideoView.getRenderer().setPan(mPanH, mPanV);
+    }
+
+    private void setDeviceMargin(float deviceMargin) {
+        mDeviceMargin = deviceMargin;
+
+        mGLView.getRenderer().setDeviceMargin(mDeviceMargin);
+        mGLVideoView.getRenderer().setDeviceMargin(mDeviceMargin);
     }
 }

@@ -4,12 +4,15 @@ import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
+import android.widget.EditText;
+
+import java.util.Locale;
 
 public class SettingsActivity extends Activity {
 
     private CheckBox mDemoModeCheckBox;
     private CheckBox mPowerSaveCheckBox;
+    private EditText mDeviceMarginEditText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,6 +21,7 @@ public class SettingsActivity extends Activity {
 
         mPowerSaveCheckBox = (CheckBox) findViewById(R.id.powerSaveCheckBox);
         mDemoModeCheckBox = (CheckBox) findViewById(R.id.demoModeCheckBox);
+        mDeviceMarginEditText = (EditText) findViewById(R.id.deviceMarginEditText);
     }
 
     @Override
@@ -38,6 +42,7 @@ public class SettingsActivity extends Activity {
 
         mDemoModeCheckBox.setChecked(settings.getBoolean("demoMode", FpvToolBox.DEFAULT_DEMO_MODE));
         mPowerSaveCheckBox.setChecked(settings.getBoolean("powerSave", FpvToolBox.DEFAULT_POWER_SAVE));
+        mDeviceMarginEditText.setText(String.format(Locale.US, "%.1f", settings.getFloat("deviceMargin", FpvToolBox.getDefaultDeviceMargin())));
     }
 
     private void saveSettings() {
@@ -46,7 +51,8 @@ public class SettingsActivity extends Activity {
 
         editor.putBoolean("demoMode", mDemoModeCheckBox.isChecked());
         editor.putBoolean("powerSave", mPowerSaveCheckBox.isChecked());
-
+        float deviceMargin = Float.parseFloat(mDeviceMarginEditText.getText().toString());
+        editor.putFloat("deviceMargin", deviceMargin);
         // Commit the edits!
         editor.commit();
     }
