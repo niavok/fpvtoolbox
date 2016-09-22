@@ -1,6 +1,7 @@
 package com.parrot.fpvtoolbox;
 
 import android.Manifest;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -47,35 +48,38 @@ public class FpvToolBox extends AppCompatActivity
     private static final float PAN_MAX_OFFSET = 50f;
 
     private static final int DEFAULT_CHROMATIC_ABERRATION_CORRECTION_MODE = 2;
+    private static final String PREFS_NAME = "FpvToolvoxPrefs";
 
 
-    private FpvGLSurfaceView mGLView;
-    private FpvGLSurfaceView mGLVideoView;
-
-    float LastX = 0;
-    float LastY = 0;
-    float LastZ = 0;
-    private WebView mWebView;
-    private GLRelativeLayout mGLLinearLayout;
-    boolean mIsFinished = false;
-    ArrayList<FpvScene> mScenes;
-    private long mLastDate = 0;
+    // Settings
     private int mChromaticAberrationCorrection = DEFAULT_CHROMATIC_ABERRATION_CORRECTION_MODE;
     private boolean mDistortionCorrection = true;
     private boolean mLensLimits = false;
     private int mCurrentSceneIndex = 0;
+    private float mViewScale = DEFAULT_SCALE;
+    private float mIpd = DEFAULT_IPD;
+    private float mPanH = DEFAULT_PAN_H;
+    private float mPanV = DEFAULT_PAN_V;
+
+    private FpvGLSurfaceView mGLView;
+    private FpvGLSurfaceView mGLVideoView;
+
+    private WebView mWebView;
+    private GLRelativeLayout mGLLinearLayout;
+    ArrayList<FpvScene> mScenes;
+
     private TextView mNotificationTextView;
     private TextView mNotificationSubTextView;
     private Handler mNotificationHandler;
-    private float mViewScale = DEFAULT_SCALE;
-    private float mIpd = DEFAULT_IPD;
+
     private float mHPanCommand;
     private float mVPanCommand;
     private Handler mPanHandler;
-    private float mPanH = DEFAULT_PAN_H;
-    private float mPanV = DEFAULT_PAN_V;
+
     private ImageView mImageView;
     private InactivityDetector mInactivityDetector;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -157,6 +161,8 @@ public class FpvToolBox extends AppCompatActivity
         super.onResume();
         Log.i(TAG, "on resume");
 
+        loadSettings();
+
         mInactivityDetector.enable();
         activate();
         generateScenes();
@@ -208,6 +214,36 @@ public class FpvToolBox extends AppCompatActivity
 
     }
 
+    private void loadSettings() {
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        mChromaticAberrationCorrection = settings.getInt("chromaticAberrationCorrection", DEFAULT_CHROMATIC_ABERRATION_CORRECTION_MODE);
+        mDistortionCorrection = settings.getBoolean("distortionCorrection", true);
+        mLensLimits = settings.getBoolean("lensLimits", false);
+        mCurrentSceneIndex = settings.getInt("currentSceneIndex", 0);
+        mViewScale = settings.getFloat("viewScale", DEFAULT_SCALE);
+        mIpd = settings.getFloat("ipd", DEFAULT_IPD);
+        mPanH = settings.getFloat("panH", DEFAULT_PAN_H);
+        mPanV = settings.getFloat("panV", DEFAULT_PAN_V);
+    }
+
+    private void saveSettings() {
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putInt("chromaticAberrationCorrection", mChromaticAberrationCorrection);
+        editor.putBoolean("distortionCorrection", mDistortionCorrection);
+        editor.putBoolean("lensLimits", mLensLimits);
+        editor.putInt("currentSceneIndex", mCurrentSceneIndex);
+        editor.putFloat("viewScale", mViewScale);
+        editor.putFloat("ipd", mIpd);
+        editor.putFloat("panH", mPanH);
+        editor.putFloat("panV", mPanV);
+
+        // Commit the edits!
+        editor.commit();
+
+    }
+
+
     private void activate() {
         WindowManager.LayoutParams layout = getWindow().getAttributes();
         layout.screenBrightness = 1F;
@@ -226,6 +262,7 @@ public class FpvToolBox extends AppCompatActivity
         mPanHandler.removeCallbacksAndMessages(null);
         mInactivityDetector.disable();
 
+        saveSettings();
 
         super.onPause();
     }
