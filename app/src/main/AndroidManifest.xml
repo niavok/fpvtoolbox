@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.parrot.fpvtoolbox">
+          package="com.niavok.fpvtoolbox">
 
     <uses-feature
         android:glEsVersion="0x00020000"
@@ -17,7 +17,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".FpvToolBox"
+            android:name="com.niavok.fpvtoolbox.FpvToolBox"
             android:label="@string/title_activity_fpv_tool_box"
             android:screenOrientation="reverseLandscape"
             android:theme="@style/AppTheme.NoActionBar">
@@ -27,7 +27,7 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".SettingsActivity"
+        <activity android:name="com.niavok.fpvtoolbox.SettingsActivity"
         android:theme="@style/SettingsTheme">
         </activity>
     </application>

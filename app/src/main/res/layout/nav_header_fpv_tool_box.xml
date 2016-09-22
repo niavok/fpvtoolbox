@@ -38,6 +38,7 @@
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Support: frederic.bertolus@parrot.com" />
+        android:autoLink="email"
+        android:text="Support: fred.bertolus@gmail.com" />
     </LinearLayout>
 </RelativeLayout>

@@ -10,7 +10,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.parrot.fpvtoolbox.SettingsActivity">
+    tools:context="com.niavok.fpvtoolbox.SettingsActivity">
 
     <ScrollView android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -69,7 +69,11 @@ android:orientation="vertical">
                       android:layout_width="match_parent" android:layout_height="wrap_content"/>
             <TextView android:text=
 "This small tool is done for Parrot Cockpit Glasses. Report bugs or change request at fred.bertolus@gmail.com.\n
-A bluetooth gamepad can be connected to replace the side menu."
+A bluetooth gamepad can be connected to replace the side menu.\n
+\n
+Licence BSD. Code available at https://github.com/niavok/fpvtoolbox
+"
+                      android:autoLink="web|email"
                       android:layout_width="match_parent" android:layout_height="wrap_content"/>
         </LinearLayout>
     </ScrollView>

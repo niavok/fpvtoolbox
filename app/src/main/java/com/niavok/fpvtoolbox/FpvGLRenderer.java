@@ -1,4 +1,30 @@
-package com.parrot.fpvtoolbox;
+/*
+ * Copyright (c) 2016, Frédéric Bertolus <frederic.bertolus@gmail.com>
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+package com.niavok.fpvtoolbox;
 
 import javax.microedition.khronos.egl.EGLConfig;
 
@@ -23,9 +49,6 @@ import java.util.ArrayList;
 
 import javax.microedition.khronos.opengles.GL10;
 
-/**
- * Created by fred on 27/05/16.
- */
 public class FpvGLRenderer  extends ViewToGLRenderer {
     private static final String TAG = "FpvGLRenderer";
     private static final float HMD_OFFSET = 34.66f;
@@ -99,23 +122,13 @@ public class FpvGLRenderer  extends ViewToGLRenderer {
         gl.glHint(GL10.GL_PERSPECTIVE_CORRECTION_HINT,
                 GL10.GL_FASTEST);
 
-
-
         // Set the background frame color
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
-        // Use culling to remove back faces.
-//        GLES20.glEnable(GLES20.GL_CULL_FACE);
-
-        // Enable depth testing
-  //      GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-
     }
 
     private IntBuffer LoadIntBuffer(String assetName) throws IOException {
         AssetManager am = mContext.getAssets();
 
-        StringBuilder buffer = new StringBuilder();
         InputStream codeFile = am.open(assetName);
         BufferedReader in = new BufferedReader(new InputStreamReader(codeFile, "UTF-8"));
         String str;
@@ -139,8 +152,6 @@ public class FpvGLRenderer  extends ViewToGLRenderer {
         }
 
         intBuffer.position(0);
-
-
 
         return intBuffer;
     }
@@ -223,12 +234,6 @@ public class FpvGLRenderer  extends ViewToGLRenderer {
         mEyeProgram = loadProgram(vertexShaderCode, fragmentShaderCode);
     }
 
-
-    /*int axis = 1;
-    float step = 0.00f;
-    float min = 55;
-    float max = 70;*/
-
     public void onDrawFrame(GL10 gl) {
 
         if(mForceRedraw)
@@ -236,7 +241,6 @@ public class FpvGLRenderer  extends ViewToGLRenderer {
             new Handler(Looper.getMainLooper()).post(new Runnable() {
                 @Override
                 public void run() {
-                    Log.d("UI thread", "I am the UI thread");
                     mRootView.invalidate();
                 }
             });
@@ -244,40 +248,13 @@ public class FpvGLRenderer  extends ViewToGLRenderer {
         super.onDrawFrame(gl);
         // Redraw background color
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
-/*
-        if(axis > 0)
-        {
-            mIpd += step;
-        }
-        else
-        {
-            mIpd -= step;
-        }
 
-        if(mIpd < min)
-        {
-            axis = 1;
-            mIpd = min;
-        }
-
-        if(mIpd > max)
-        {
-            axis = -1;
-            mIpd = max;
-        }
-
-        Log.e(TAG, "setupEyes mIpd=" + mIpd);
-
-        setupEyes(10, mIpd);
-*/
         if(mDistortionCorrection) {
             if (mLeftEye != null) {
-                //GLES20.glScissor(0,0, mPixelWidth / 2, mPixelHeight);
                 mLeftEye.draw();
             }
 
             if (mRightEye != null) {
-                //GLES20.glScissor(mPixelWidth / 2,0, mPixelWidth / 2, mPixelHeight);
                 mRightEye.draw();
             }
         }
@@ -310,7 +287,6 @@ public class FpvGLRenderer  extends ViewToGLRenderer {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
-                Log.d("UI thread", "I am the UI thread");
                 if(mRootView != null) {
                     mRootView.invalidate();
                 }

@@ -1,4 +1,4 @@
-package com.parrot.fpvtoolbox;
+package com.niavok.fpvtoolbox;
 
 import org.junit.Test;
 

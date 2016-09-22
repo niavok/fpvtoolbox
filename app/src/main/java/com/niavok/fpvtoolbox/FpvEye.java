@@ -1,17 +1,38 @@
-package com.parrot.fpvtoolbox;
+/*
+ * Copyright (c) 2016, Frédéric Bertolus <frederic.bertolus@gmail.com>
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+package com.niavok.fpvtoolbox;
 
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.util.Log;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
-/**
- * Created by fred on 27/05/16.
- */
 public class FpvEye {
     private static final String TAG = "FpvEye";
     private final FloatBuffer mPositionBuffer;
@@ -49,45 +70,12 @@ public class FpvEye {
     private float mEyeOffsetX = 0; // mm
     private float mEyeOffsetY = 0; // mm
 
-
-    /*static int mockIndices[] = {
-            0, 3, 1 ,
-            0, 2, 3,
-    };
-
-    float mockPosition[] = {
-            -1,-1,
-            -1,1,
-            1, -1,
-            1, 1,
-    };
-
-    float mockColor[] = {
-            1, 1, 1, 1,
-            1, 1, 1, 1,
-            1, 1, 1, 1,
-            1, 1, 1, 1,
-    };
-
-    float mockTextCoord[] = {
-            0,1,
-            0,0,
-            1,1,
-            1,0,
-    };*/
-
-
     public FpvEye(FpvGLRenderer fpvGLRenderer, int program, IntBuffer indices, FloatBuffer positions, FloatBuffer colors,  FloatBuffer textureCoordsRed,  FloatBuffer textureCoordsGreen,  FloatBuffer textureCoordsBlue) {
         this.mRenderer = fpvGLRenderer;
 
         mProgram = program;
 
         initProgram();
-
-        /*mIndicesBuffer = AllocIntBuffer(mockIndices);
-        mPositionBuffer = AllocFloatBuffer(mockPosition);
-        mColorBuffer = AllocFloatBuffer(mockColor);
-        mTextCoordBuffer = AllocFloatBuffer(mockTextCoord);*/
 
         mIndicesBuffer = indices;
         mPositionBuffer = positions;
@@ -103,42 +91,6 @@ public class FpvEye {
         loadBuffers();
 
         Log.d(TAG, "mPositionBuffer float buffer with limit="+mPositionBuffer.limit());
-    }
-
-    private IntBuffer AllocIntBuffer(int[] data) {
-        // initialize vertex byte buffer for shape coordinates
-        ByteBuffer bb = ByteBuffer.allocateDirect(
-                // (number of coordinate values * 4 bytes per float)
-                data.length * 4);
-        // use the device hardware's native byte order
-        bb.order(ByteOrder.nativeOrder());
-
-        // create a floating point buffer from the ByteBuffer
-        IntBuffer buffer = bb.asIntBuffer();
-        // add the coordinates to the FloatBuffer
-        buffer.put(data);
-        // set the buffer to read the first coordinate
-        buffer.position(0);
-
-        return buffer;
-    }
-
-    private FloatBuffer AllocFloatBuffer(float[] data) {
-        // initialize vertex byte buffer for shape coordinates
-        ByteBuffer bb = ByteBuffer.allocateDirect(
-                // (number of coordinate values * 4 bytes per float)
-                data.length * 4);
-        // use the device hardware's native byte order
-        bb.order(ByteOrder.nativeOrder());
-
-        // create a floating point buffer from the ByteBuffer
-        FloatBuffer buffer = bb.asFloatBuffer();
-        // add the coordinates to the FloatBuffer
-        buffer.put(data);
-        // set the buffer to read the first coordinate
-        buffer.position(0);
-
-        return buffer;
     }
 
     private void loadBuffers() {
@@ -252,8 +204,6 @@ public class FpvEye {
 
     public void draw() {
 
-
-
         // Add program to OpenGL ES environment
         GLES20.glUseProgram(mProgram);
 
@@ -304,9 +254,6 @@ public class FpvEye {
             GLES20.glVertexAttribPointer(mProgramTexCoord2, 2, GLES20.GL_FLOAT, false, 0, 0);
         }
 
-
-        //GLES20.glUniform2f(mProgramEyeToSourceUVScale, 2f, 2f);
-
         //Texture aspect ratio
         if(mRenderer.getTextureWidth() == mRenderer.getTextureHeight())
         {
@@ -327,7 +274,6 @@ public class FpvEye {
                 GLES20.glUniform2f(mProgramEyeToSourceUVOffset,mRenderer.getPanH() / (ratio *mRenderer.getMetricsWidth()), ratio * mRenderer.getPanV() / mRenderer.getMetricsHeight());
             }
         }
-
 
         GLES20.glUniform2f(mProgramEyeToSourceUVOffset, mRenderer.getPanH() ,mRenderer.getPanV() );
 

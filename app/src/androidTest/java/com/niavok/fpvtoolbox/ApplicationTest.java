@@ -1,4 +1,4 @@
-package com.parrot.fpvtoolbox;
+package com.niavok.fpvtoolbox;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

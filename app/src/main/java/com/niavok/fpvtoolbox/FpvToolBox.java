@@ -1,4 +1,30 @@
-package com.parrot.fpvtoolbox;
+/*
+ * Copyright (c) 2016, Frédéric Bertolus <frederic.bertolus@gmail.com>
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+package com.niavok.fpvtoolbox;
 
 import android.Manifest;
 import android.content.Intent;
@@ -401,9 +427,6 @@ public class FpvToolBox extends AppCompatActivity
                 File[] fileList = videosPath.listFiles();
                 Arrays.sort(fileList);
                 for(File videoFile : fileList) {
-
-                    Log.e("Plop", "Analyse video "+videoFile.getName());
-
                     if(videoFile.isDirectory())
                     {
                         continue;
@@ -449,8 +472,6 @@ public class FpvToolBox extends AppCompatActivity
                         continue;
                     }
 
-                    Log.e("Plop", "Analyse image "+imageFile.getName());
-
                     String pickedImagePath = "path/of/the/selected/file";
                     BitmapFactory.Options bitMapOption=new BitmapFactory.Options();
                     bitMapOption.inJustDecodeBounds=true;
@@ -470,7 +491,6 @@ public class FpvToolBox extends AppCompatActivity
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         boolean handled = false;
-        Log.e("plop","dispatchKeyEvent "+ event.toString());
 
         mInactivityDetector.activate();
 
@@ -501,8 +521,6 @@ public class FpvToolBox extends AppCompatActivity
                         increaseIPD();
                         break;
                 }
-                Log.e("plop", "Key =" + event.getKeyCode() + " event.getAction()= "+ event.getAction());
-
             }
             handled = true;
         }
@@ -525,15 +543,8 @@ public class FpvToolBox extends AppCompatActivity
                         decreaseScale();
                         break;
                 }
-                Log.e("plop", "Key =" + event.getKeyCode() + " event.getAction()= "+ event.getAction());
-
             }
-            //Log.e("plop","Dpad ="+ event.getKeyCode(), " "+ e.t);
             handled = true;
-        }
-        else
-        {
-            Log.e("plop","event form source : "+ event.getSource());
         }
 
         return handled;
@@ -545,20 +556,6 @@ public class FpvToolBox extends AppCompatActivity
         mVPanCommand = ev.getAxisValue(MotionEvent.AXIS_RZ);
 
         mInactivityDetector.activate();
-
-        /*Log.e("plop","dispatchGenericMotionEvent "+ ev.toString());
-        Log.e("plop","getAction "+ ev.getAction());
-
-        Log.e("plop","AXIS_HAT_X "+  ev.getAxisValue(MotionEvent.AXIS_HAT_X));
-        Log.e("plop","AXIS_HAT_Y "+  ev.getAxisValue(MotionEvent.AXIS_HAT_Y));
-        Log.e("plop","AXIS_X "+  ev.getAxisValue(MotionEvent.AXIS_X));
-        Log.e("plop","AXIS_Y "+  ev.getAxisValue(MotionEvent.AXIS_Y));
-        Log.e("plop","AXIS_Z "+  ev.getAxisValue(MotionEvent.AXIS_Z));
-        Log.e("plop","AXIS_RX "+  ev.getAxisValue(MotionEvent.AXIS_RX));
-        Log.e("plop","AXIS_RY "+  ev.getAxisValue(MotionEvent.AXIS_RY));
-        Log.e("plop","AXIS_RZ "+  ev.getAxisValue(MotionEvent.AXIS_RZ));*/
-
-
 
         return super.dispatchGenericMotionEvent(ev);
     }
@@ -578,8 +575,6 @@ public class FpvToolBox extends AppCompatActivity
     }
     public void enableVideo(String url)
     {
-       // ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-//                0);
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -650,7 +645,6 @@ public class FpvToolBox extends AppCompatActivity
         {
             mCurrentSceneIndex = 0;
         }
-        Log.e("plop","nextScene");
         updateScene();
     }
 
@@ -660,20 +654,15 @@ public class FpvToolBox extends AppCompatActivity
         {
             mCurrentSceneIndex = mScenes.size() -1;
         }
-        Log.e("plop","previousScene");
 
         updateScene();
     }
 
     private void updateScene()
     {
-        Log.e("plop","mScenes.size() " +mScenes.size());
-        Log.e("plop","mCurrentSceneIndex " + mCurrentSceneIndex);
-
         if(mScenes.get(mCurrentSceneIndex).getType() == FpvScene.SceneType.WEB)
         {
             String url = mScenes.get(mCurrentSceneIndex).getUrl();
-            Log.e("plop","updateScene : "+ url);
             enableWeb(url);
 
             mGLLinearLayout.invalidate();
@@ -681,14 +670,12 @@ public class FpvToolBox extends AppCompatActivity
         else if(mScenes.get(mCurrentSceneIndex).getType() == FpvScene.SceneType.VIDEO)
         {
             String url = mScenes.get(mCurrentSceneIndex).getUrl();
-            Log.e("plop","updateScene movie : "+ url);
 
             enableVideo(url);
         }
         else if(mScenes.get(mCurrentSceneIndex).getType() == FpvScene.SceneType.IMAGE)
         {
             String url = mScenes.get(mCurrentSceneIndex).getUrl();
-            Log.e("plop","updateScene image : "+ url);
 
             enableImage(url);
         }
@@ -827,7 +814,6 @@ public class FpvToolBox extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-        Log.e("plop", "onNavigationItemSelected");
 
         if (id == R.id.nav_next) {
             nextScene();

@@ -5,15 +5,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.parrot.fpvtoolbox.FpvToolBox"
+    tools:context="com.niavok.fpvtoolbox.FpvToolBox"
     tools:showIn="@layout/app_bar_fpv_tool_box">
 
-    <com.parrot.fpvtoolbox.FpvGLSurfaceView
+    <com.niavok.fpvtoolbox.FpvGLSurfaceView
         android:id="@+id/gl_surface"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <com.parrot.fpvtoolbox.FpvGLSurfaceView
+    <com.niavok.fpvtoolbox.FpvGLSurfaceView
         android:id="@+id/gl_video_surface"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
@@ -25,7 +25,7 @@
         android:layout_centerInParent="true"/>
 
     <!-- a view to be rendered to gl surface-->
-    <com.parrot.fpvtoolbox.GLRelativeLayout
+    <com.niavok.fpvtoolbox.GLRelativeLayout
         android:id="@+id/gl_layout"
         android:layout_width="1280px"
         android:layout_height="1280px"
@@ -66,5 +66,5 @@
             android:src="@drawable/ic_menu_gallery"/>-->
 
 
-    </com.parrot.fpvtoolbox.GLRelativeLayout>
+    </com.niavok.fpvtoolbox.GLRelativeLayout>
 </RelativeLayout>
