@@ -60,6 +60,9 @@ android:orientation="vertical">
             </LinearLayout>
             <TextView android:text="Distance between the bottom of the screen and the bottom of the HMD (when in position in the HDM). Often equal to to phone left screen margin when taken in portrait. About 4 mm."
                       android:layout_width="match_parent" android:layout_height="wrap_content"/>
+            <Button android:id="@+id/resetAllButton" android:text="Reset all settings"
+                android:layout_marginTop="60dp"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"/>
             <TextView android:text="FPV Toolbox 1.0"
                       android:layout_marginTop="60dp"
                       style="@style/Base.Widget.AppCompat.CompoundButton.CheckBox"

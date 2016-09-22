@@ -41,27 +41,30 @@ public class FpvToolBox extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = "FpvToolBox";
-    private static final float DEFAULT_IPD = 63.0f;
-    private static final float DEFAULT_SCALE = 0.75f;
-    private static final float DEFAULT_PAN_H = 0.0f;
-    private static final float DEFAULT_PAN_V = 0.0f;
+    public static final float DEFAULT_IPD = 63.0f;
+    public static final float DEFAULT_SCALE = 0.75f;
+    public static final float DEFAULT_PAN_H = 0.0f;
+    public static final float DEFAULT_PAN_V = 0.0f;
 
-    private static final float PAN_DEAD_ZONE = 0.01f;
-    private static final float PAN_MAX_SPEED = 10f;
-    private static final float PAN_MAX_OFFSET = 50f;
+    public static final float PAN_DEAD_ZONE = 0.01f;
+    public static final float PAN_MAX_SPEED = 10f;
+    public static final float PAN_MAX_OFFSET = 50f;
 
-    private static final float DEFAULT_DEVICE_MARGIN = 4.0f;
+    public static final float DEFAULT_DEVICE_MARGIN = 4.0f;
 
-    private static final int DEFAULT_CHROMATIC_ABERRATION_CORRECTION_MODE = 2;
+    public static final int DEFAULT_CHROMATIC_ABERRATION_CORRECTION_MODE = 2;
+    public static final boolean DEFAULT_DISTORTION_CORRECTION = true;
+    public static final boolean DEFAULT_DISPLAY_LENS_LIMITS = false;
     public static final String PREFS_NAME = "FpvToolvoxPrefs";
     public static final boolean DEFAULT_DEMO_MODE = false;
     public static final boolean DEFAULT_POWER_SAVE = true;
 
 
+
     // Settings
     private int mChromaticAberrationCorrection = DEFAULT_CHROMATIC_ABERRATION_CORRECTION_MODE;
-    private boolean mDistortionCorrection = true;
-    private boolean mLensLimits = false;
+    private boolean mDistortionCorrection = DEFAULT_DISTORTION_CORRECTION;
+    private boolean mLensLimits = DEFAULT_DISPLAY_LENS_LIMITS;
     private int mCurrentSceneIndex = 0;
     private float mViewScale = DEFAULT_SCALE;
     private float mIpd = DEFAULT_IPD;
@@ -244,8 +247,8 @@ public class FpvToolBox extends AppCompatActivity
     private void loadSettings() {
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         mChromaticAberrationCorrection = settings.getInt("chromaticAberrationCorrection", DEFAULT_CHROMATIC_ABERRATION_CORRECTION_MODE);
-        mDistortionCorrection = settings.getBoolean("distortionCorrection", true);
-        mLensLimits = settings.getBoolean("lensLimits", false);
+        mDistortionCorrection = settings.getBoolean("distortionCorrection", DEFAULT_DISTORTION_CORRECTION);
+        mLensLimits = settings.getBoolean("lensLimits", DEFAULT_DISPLAY_LENS_LIMITS);
         mCurrentSceneIndex = settings.getInt("currentSceneIndex", 0);
         mViewScale = settings.getFloat("viewScale", DEFAULT_SCALE);
         mIpd = settings.getFloat("ipd", DEFAULT_IPD);
@@ -605,8 +608,8 @@ public class FpvToolBox extends AppCompatActivity
 
     private void resetSettings() {
         mChromaticAberrationCorrection = DEFAULT_CHROMATIC_ABERRATION_CORRECTION_MODE;
-        mDistortionCorrection = true;
-        mLensLimits = false;
+        mDistortionCorrection = DEFAULT_DISTORTION_CORRECTION;
+        mLensLimits = DEFAULT_DISPLAY_LENS_LIMITS;
 
 
         setIpd(DEFAULT_IPD);
