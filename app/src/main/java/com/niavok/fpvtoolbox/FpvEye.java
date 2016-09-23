@@ -59,6 +59,7 @@ public class FpvEye {
     private int mProgramEyeToSourceOffset;
     private int mProgramEyeToSourceScale;
     private int mProgramChromaticAberrationCorrection;
+    private int mProgramRotation;
     private int mProgramLensLimits;
     private int mProgramPosition;
     private int mProgramColor;
@@ -167,6 +168,12 @@ public class FpvEye {
             Log.e(TAG, "Fail to get uniform 'ChromaticAberrationCorrection' location loading program");
         }
 
+        mProgramRotation = GLES20.glGetUniformLocation(mProgram, "Rotation");
+        if(mProgramRotation < 0)
+        {
+            Log.e(TAG, "Fail to get uniform 'Rotation' location loading program");
+        }
+
         mProgramLensLimits = GLES20.glGetUniformLocation(mProgram, "LensLimits");
         if(mProgramLensLimits < 0)
         {
@@ -262,7 +269,14 @@ public class FpvEye {
         }
         else
         {
-            float ratio = (float) mRenderer.getTextureWidth() / (float) mRenderer.getTextureHeight();
+            float ratio;
+
+            ratio = (float) mRenderer.getTextureWidth() / (float) mRenderer.getTextureHeight();
+
+            if(mRenderer.getRotation() == 90 || mRenderer.getRotation() == 270) {
+                ratio = (float) mRenderer.getTextureHeight() / (float) mRenderer.getTextureWidth();
+            }
+
             if(ratio > 1)
             {
                 GLES20.glUniform2f(mProgramEyeToSourceUVScale, mRenderer.getViewScale(), mRenderer.getViewScale() * ratio);
@@ -285,6 +299,8 @@ public class FpvEye {
         {
             GLES20.glUniform1i(mProgramChromaticAberrationCorrection, 0);
         }
+
+        GLES20.glUniform1i(mProgramRotation, mRenderer.getRotation());
 
         if(mRenderer.isShowLensLimits())
         {

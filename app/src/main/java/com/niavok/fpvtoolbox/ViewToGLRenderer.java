@@ -64,6 +64,7 @@ public class ViewToGLRenderer implements GLSurfaceView.Renderer {
     private int mVideoWidth;
     private int mVideoHeight;
     private GLSurfaceView mSurfaceView;
+    private int mRotation = 0;
 
     public ViewToGLRenderer(GLSurfaceView surfaceView) {
 
@@ -80,10 +81,11 @@ public class ViewToGLRenderer implements GLSurfaceView.Renderer {
         }
     }
 
-    synchronized public void enableVideo(Context context, String url)
+    synchronized public void enableVideo(Context context, String url, int rotation)
     {
         disableVideo();
         Log.e("ViewToGLRenderer", "enableVideo "+ url);
+        mRotation = rotation;
         mVideoPlayer = new MediaPlayer();
         try {
             mVideoPlayer.setDataSource(url);
@@ -114,6 +116,7 @@ public class ViewToGLRenderer implements GLSurfaceView.Renderer {
             mVideoPlayer.stop();
             mVideoPlayer.reset();
             mVideoPlayer = null;
+            mRotation = 0;
         }
     }
 
@@ -135,6 +138,7 @@ public class ViewToGLRenderer implements GLSurfaceView.Renderer {
             });
             Log.e("ViewToGLRenderer", "onSurfaceChanged mTextureWidth"+mTextureWidth + " mTextureHeight="+mTextureHeight);
             mSurfaceTexture.setDefaultBufferSize(mTextureWidth, mTextureHeight);
+
             mSurface = new Surface(mSurfaceTexture);
             if(mVideoPlayer != null) {
                 mVideoPlayer.setSurface(mSurface);
@@ -242,5 +246,9 @@ public class ViewToGLRenderer implements GLSurfaceView.Renderer {
 
     public void setTextureHeight(int textureHeight) {
         mTextureHeight = textureHeight;
+    }
+
+    public int getRotation() {
+        return mRotation;
     }
 }

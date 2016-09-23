@@ -37,18 +37,24 @@ public class FpvScene {
 
     private String mName;
     private String mSubtitle;
-    String mUrl;
-    SceneType mType;
+    private String mUrl;
+    private int mRotation;
+    private SceneType mType;
 
-    public FpvScene(String name,String url, SceneType type,  String subtitle) {
+    public FpvScene(String name,String url, SceneType type,  String subtitle, int rotation) {
         mName = name;
         mUrl = url;
         mType = type;
         mSubtitle = subtitle;
+        mRotation = rotation;
     }
 
     public String getUrl() {
         return mUrl;
+    }
+
+    public int getRotation() {
+        return mRotation;
     }
 
     public SceneType getType() {

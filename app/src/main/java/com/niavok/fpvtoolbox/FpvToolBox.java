@@ -441,9 +441,11 @@ public class FpvToolBox extends AppCompatActivity
                         {
                             String height = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT);
                             String width = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH);
+                            String rotation = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION);
 
-                        mScenes.add(new FpvScene(videoFile.getName(),  videoFile.getAbsolutePath(), FpvScene.SceneType.VIDEO, ""+width+" px x "+height+" px video"));
-                            mScenes.add(new FpvScene(videoFile.getName(),  videoFile.getAbsolutePath(), FpvScene.SceneType.VIDEO, ""+width+" px x "+height+" px video"));
+                            int parsedRotation = Integer.parseInt(rotation);
+
+                            mScenes.add(new FpvScene(videoFile.getName(),  videoFile.getAbsolutePath(), FpvScene.SceneType.VIDEO, ""+width+" px x "+height+" px video", parsedRotation));
                         }
                     } catch (Exception e) {
                         Log.e(TAG,"Fail to analyse video '"+videoFile.getAbsolutePath()+"'");
@@ -486,7 +488,7 @@ public class FpvToolBox extends AppCompatActivity
                     if(bitMapOption.outWidth != -1) {
                         int width = bitMapOption.outWidth;
                         int height = bitMapOption.outHeight;
-                        mScenes.add(new FpvScene(imageFile.getName(), imageFile.getAbsolutePath(), FpvScene.SceneType.IMAGE, "" + width + " px x " + height + " px image"));
+                        mScenes.add(new FpvScene(imageFile.getName(), imageFile.getAbsolutePath(), FpvScene.SceneType.IMAGE, "" + width + " px x " + height + " px image", 0));
                     }
                 }
             }
@@ -579,7 +581,7 @@ public class FpvToolBox extends AppCompatActivity
         mImageView.setImageURI(Uri.parse(url));
         mImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
     }
-    public void enableVideo(String url)
+    public void enableVideo(String url, int rotation)
     {
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -591,7 +593,7 @@ public class FpvToolBox extends AppCompatActivity
         } else {
             disableAll();
             mGLVideoView.setVisibility(View.VISIBLE);
-            mGLVideoView.getRenderer().enableVideo(getApplicationContext(), url);
+            mGLVideoView.getRenderer().enableVideo(getApplicationContext(), url, rotation);
         }
     }
 
@@ -694,9 +696,9 @@ public class FpvToolBox extends AppCompatActivity
         }
         else if(mScenes.get(mCurrentSceneIndex).getType() == FpvScene.SceneType.VIDEO)
         {
-            String url = mScenes.get(mCurrentSceneIndex).getUrl();
+            FpvScene videoScene = mScenes.get(mCurrentSceneIndex);
 
-            enableVideo(url);
+            enableVideo(videoScene.getUrl(), videoScene.getRotation());
         }
         else if(mScenes.get(mCurrentSceneIndex).getType() == FpvScene.SceneType.IMAGE)
         {
