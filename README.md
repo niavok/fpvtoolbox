@@ -26,3 +26,12 @@ Side menu
 
 Settings menu
 ![FPV Toolbox settings](https://raw.githubusercontent.com/niavok/fpvtoolbox/master/screenshots/fpv_toolbox_settings.png)
+
+
+## Change log
+
+### version 1.1
+* add rescan button in the side menu to scan the available media without kill the app
+* support rotated videos
+* fix crash if a video file is not playable but the Android media system
+* fix crash if no content after wake up
