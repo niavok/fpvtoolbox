@@ -660,7 +660,7 @@ public class FpvToolBox extends AppCompatActivity
 
     private void updateScene()
     {
-        if(mCurrentSceneIndex > mScenes.size())
+        if(mCurrentSceneIndex >= mScenes.size())
         {
             if(mScenes.size() > 0) {
                 mCurrentSceneIndex = mScenes.size() -1;
