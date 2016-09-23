@@ -601,6 +601,11 @@ public class FpvToolBox extends AppCompatActivity
         updateScene();
     }
 
+    private void rescan() {
+        generateScenes();
+        updateScene();
+    }
+
     private void resetSettings() {
         mChromaticAberrationCorrection = DEFAULT_CHROMATIC_ABERRATION_CORRECTION_MODE;
         mDistortionCorrection = DEFAULT_DISTORTION_CORRECTION;
@@ -840,6 +845,8 @@ public class FpvToolBox extends AppCompatActivity
             toogleLensLimits();
         } else if (id == R.id.nav_reset_settings) {
             resetSettings();
+        } else if (id == R.id.nav_rescan) {
+            rescan();
         } else if (id == R.id.nav_reload) {
             reload();
         } else if (id == R.id.nav_increase_ipd) {
