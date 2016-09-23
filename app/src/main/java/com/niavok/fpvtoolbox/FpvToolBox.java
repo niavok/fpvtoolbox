@@ -431,18 +431,24 @@ public class FpvToolBox extends AppCompatActivity
                     {
                         continue;
                     }
+                    Log.i(TAG,"Analyse video '"+videoFile.getAbsolutePath()+"'");
 
-                    MediaMetadataRetriever metaRetriever = new MediaMetadataRetriever();
-                    metaRetriever.setDataSource(videoFile.getAbsolutePath());
-                    if(metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_VIDEO) != null)
-                    {
-                        String height = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT);
-                        String width = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH);
+                    try {
+                        MediaMetadataRetriever metaRetriever = new MediaMetadataRetriever();
+
+                        metaRetriever.setDataSource(videoFile.getAbsolutePath());
+                        if(metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_VIDEO) != null)
+                        {
+                            String height = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT);
+                            String width = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH);
 
                         mScenes.add(new FpvScene(videoFile.getName(),  videoFile.getAbsolutePath(), FpvScene.SceneType.VIDEO, ""+width+" px x "+height+" px video"));
+                            mScenes.add(new FpvScene(videoFile.getName(),  videoFile.getAbsolutePath(), FpvScene.SceneType.VIDEO, ""+width+" px x "+height+" px video"));
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG,"Fail to analyse video '"+videoFile.getAbsolutePath()+"'");
+                        e.printStackTrace();
                     }
-
-
                 }
             }
         }
@@ -472,7 +478,7 @@ public class FpvToolBox extends AppCompatActivity
                         continue;
                     }
 
-                    String pickedImagePath = "path/of/the/selected/file";
+                    Log.e(TAG,"Analyse image '"+imageFile.getAbsolutePath()+"'");
                     BitmapFactory.Options bitMapOption=new BitmapFactory.Options();
                     bitMapOption.inJustDecodeBounds=true;
                     BitmapFactory.decodeFile(imageFile.getAbsolutePath(), bitMapOption);
@@ -604,6 +610,7 @@ public class FpvToolBox extends AppCompatActivity
     private void rescan() {
         generateScenes();
         updateScene();
+        sendNotification("Rescan done. "+mScenes.size()+" valid media found.");
     }
 
     private void resetSettings() {
