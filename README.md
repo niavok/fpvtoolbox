@@ -30,6 +30,9 @@ Settings menu
 
 ## Change log
 
+### version 1.2
+* use immersive fullscren to hide navigation bar
+
 ### version 1.1
 * add rescan button in the side menu to scan the available media without kill the app
 * support rotated videos
