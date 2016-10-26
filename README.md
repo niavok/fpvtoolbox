@@ -30,6 +30,10 @@ Settings menu
 
 ## Change log
 
+### version 1.2.1
+* stop video decoding on background
+* fix memory leak at each video startup
+
 ### version 1.2
 * use immersive fullscren to hide navigation bar
 

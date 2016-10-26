@@ -63,7 +63,7 @@ android:orientation="vertical">
             <Button android:id="@+id/resetAllButton" android:text="Reset all settings"
                 android:layout_marginTop="30dp"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-            <TextView android:text="FPV Toolbox 1.2"
+            <TextView android:text="FPV Toolbox 1.2.1"
                       android:layout_marginTop="30dp"
                       style="@style/Base.Widget.AppCompat.CompoundButton.CheckBox"
                       android:layout_width="match_parent" android:layout_height="wrap_content"/>
@@ -82,6 +82,11 @@ Licence BSD. Code available at https://github.com/niavok/fpvtoolbox
                       android:layout_width="match_parent" android:layout_height="wrap_content"/>
             <TextView android:text=
 "
+> version 1.2.1\n
+* stop video decoding on background\n
+* fix memory leak at each video startup\n
+\n
+
 > version 1.2\n
 * use immersive fullscren to hide navigation bar\n
 \n
