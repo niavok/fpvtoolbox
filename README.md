@@ -33,6 +33,7 @@ Settings menu
 ### version 1.2.1
 * stop video decoding on background
 * fix memory leak at each video startup
+* fix power save wake using menu or gamepad
 
 ### version 1.2
 * use immersive fullscren to hide navigation bar

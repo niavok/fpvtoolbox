@@ -102,20 +102,6 @@ public class ViewToGLRenderer implements GLSurfaceView.Renderer {
         {
             mVideoPlayer = new MediaPlayer();
             mVideoPlayer.setSurface(mSurface);
-
-            mVideoPlayer.setOnVideoSizeChangedListener(new MediaPlayer.OnVideoSizeChangedListener() {
-                @Override
-                public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
-                    Log.e("ViewToGLRenderer", "setOnVideoSizeChangedListener");
-                    mSurfaceView.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            Log.e("ViewToGLRenderer", "VISIBLE ");
-                            mSurfaceView.setVisibility(View.VISIBLE);
-                        }
-                    }, 300);
-                }
-            });
         }
 
         try {
@@ -135,6 +121,13 @@ public class ViewToGLRenderer implements GLSurfaceView.Renderer {
         }
         mVideoPlayer.start();
         mEnabled = true;
+        mSurfaceView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Log.e("ViewToGLRenderer", "VISIBLE ");
+                mSurfaceView.setVisibility(View.VISIBLE);
+            }
+        }, 250);
     }
 
     synchronized  public void disableVideo()

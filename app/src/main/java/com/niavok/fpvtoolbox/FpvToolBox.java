@@ -117,7 +117,7 @@ public class FpvToolBox extends AppCompatActivity
 
     private ImageView mImageView;
     private InactivityDetector mInactivityDetector;
-
+    private boolean mActive = false;
 
 
     @Override
@@ -168,7 +168,6 @@ public class FpvToolBox extends AppCompatActivity
             public void OnActive() {
                 if (mPowerSave) {
                     Log.i(TAG, "Activate");
-                    reload();
                     activate();
                 }
             }
@@ -177,7 +176,6 @@ public class FpvToolBox extends AppCompatActivity
             public void OnInactive() {
                 if (mPowerSave) {
                     Log.i(TAG, "Deactivate");
-                    disableAll();
                     deactivate();
                 }
             }
@@ -241,12 +239,11 @@ public class FpvToolBox extends AppCompatActivity
         Log.i(TAG, "on resume");
 
         loadSettings();
-
-        mInactivityDetector.enable();
-        activate();
         generateScenes();
 
-        updateScene();
+        mInactivityDetector.enable();
+
+
         setViewScale(mViewScale);
         setIpd(mIpd);
         setPan(mPanH, mPanV);
@@ -292,6 +289,7 @@ public class FpvToolBox extends AppCompatActivity
         };
         mPanHandler.postDelayed(runnable, 30);
 
+        activate();
     }
 
     private void loadSettings() {
@@ -375,12 +373,20 @@ public class FpvToolBox extends AppCompatActivity
 
 
     private void activate() {
+        if (!mActive) {
+            reload();
+        }
+
         WindowManager.LayoutParams layout = getWindow().getAttributes();
         layout.screenBrightness = 1F;
         getWindow().setAttributes(layout);
     }
 
     private void deactivate() {
+        if (mActive) {
+            disableAll();
+        }
+
         WindowManager.LayoutParams layout = getWindow().getAttributes();
         layout.screenBrightness = 0F;
         getWindow().setAttributes(layout);
@@ -526,6 +532,7 @@ public class FpvToolBox extends AppCompatActivity
         boolean handled = false;
 
         mInactivityDetector.activate();
+        activate();
 
         if ((event.getSource() & InputDevice.SOURCE_GAMEPAD)
                 == InputDevice.SOURCE_GAMEPAD) {
@@ -589,6 +596,7 @@ public class FpvToolBox extends AppCompatActivity
         mVPanCommand = ev.getAxisValue(MotionEvent.AXIS_RZ);
 
         mInactivityDetector.activate();
+        activate();
 
         return super.dispatchGenericMotionEvent(ev);
     }
@@ -623,6 +631,7 @@ public class FpvToolBox extends AppCompatActivity
 
     public void disableAll()
     {
+        mActive = false;
         mGLVideoView.setVisibility(View.INVISIBLE);
         mGLVideoView.getRenderer().disableVideo();
         mWebView.setVisibility(View.INVISIBLE);
@@ -733,6 +742,7 @@ public class FpvToolBox extends AppCompatActivity
         if(!mDemoMode) {
             sendNotification("Scene: " + mScenes.get(mCurrentSceneIndex).getName(), mScenes.get(mCurrentSceneIndex).getSubtitle());
         }
+        mActive = true;
     }
 
     private void toogleChromaticAberrationCorrection() {
@@ -909,7 +919,8 @@ public class FpvToolBox extends AppCompatActivity
         }
 
 
-
+        mInactivityDetector.activate();
+        activate();
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);

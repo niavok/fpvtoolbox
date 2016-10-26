@@ -85,6 +85,7 @@ Licence BSD. Code available at https://github.com/niavok/fpvtoolbox
 > version 1.2.1\n
 * stop video decoding on background\n
 * fix memory leak at each video startup\n
+* fix power save wake using menu or gamepad\n
 \n
 
 > version 1.2\n
