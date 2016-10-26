@@ -617,7 +617,6 @@ public class FpvToolBox extends AppCompatActivity
                         0);
         } else {
             disableAll();
-            mGLVideoView.setVisibility(View.VISIBLE);
             mGLVideoView.getRenderer().enableVideo(getApplicationContext(), url, rotation);
         }
     }

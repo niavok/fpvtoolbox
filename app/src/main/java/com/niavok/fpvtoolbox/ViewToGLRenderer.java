@@ -36,6 +36,7 @@ import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
 import android.util.Log;
 import android.view.Surface;
+import android.view.View;
 
 import java.io.IOException;
 
@@ -65,6 +66,7 @@ public class ViewToGLRenderer implements GLSurfaceView.Renderer {
     private int mVideoHeight;
     private GLSurfaceView mSurfaceView;
     private int mRotation = 0;
+    private boolean mEnabled = true;
 
     public ViewToGLRenderer(GLSurfaceView surfaceView) {
 
@@ -78,6 +80,15 @@ public class ViewToGLRenderer implements GLSurfaceView.Renderer {
             // update texture
             mSurfaceTexture.updateTexImage();
 
+            if(!mEnabled && mSurfaceView.getVisibility() != View.INVISIBLE)
+            {
+                mSurfaceView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mSurfaceView.setVisibility(View.INVISIBLE);
+                    }
+                });
+            }
         }
     }
 
@@ -86,10 +97,29 @@ public class ViewToGLRenderer implements GLSurfaceView.Renderer {
         disableVideo();
         Log.e("ViewToGLRenderer", "enableVideo "+ url);
         mRotation = rotation;
-        mVideoPlayer = new MediaPlayer();
+
+        if(mVideoPlayer == null)
+        {
+            mVideoPlayer = new MediaPlayer();
+            mVideoPlayer.setSurface(mSurface);
+
+            mVideoPlayer.setOnVideoSizeChangedListener(new MediaPlayer.OnVideoSizeChangedListener() {
+                @Override
+                public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
+                    Log.e("ViewToGLRenderer", "setOnVideoSizeChangedListener");
+                    mSurfaceView.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.e("ViewToGLRenderer", "VISIBLE ");
+                            mSurfaceView.setVisibility(View.VISIBLE);
+                        }
+                    }, 300);
+                }
+            });
+        }
+
         try {
             mVideoPlayer.setDataSource(url);
-            mVideoPlayer.setSurface(mSurface);
             mVideoPlayer.setLooping(true);
 
             try {
@@ -100,28 +130,32 @@ public class ViewToGLRenderer implements GLSurfaceView.Renderer {
             {
                 e.printStackTrace();
             }
-
-
         } catch (IOException e) {
             e.printStackTrace();
         }
         mVideoPlayer.start();
-
+        mEnabled = true;
     }
 
     synchronized  public void disableVideo()
     {
         Log.e("ViewToGLRenderer", "disableVideo");
+        mEnabled = false;
         if(mVideoPlayer != null) {
             mVideoPlayer.stop();
             mVideoPlayer.reset();
-            mVideoPlayer = null;
             mRotation = 0;
         }
     }
 
     @Override
     synchronized public void onSurfaceChanged(GL10 gl, int width, int height){
+
+        if(mSurfaceTexture != null && mSurface != null)
+        {
+            return;
+        }
+
         releaseSurface();
 
         mGlSurfaceTexture = createTexture();
@@ -151,6 +185,7 @@ public class ViewToGLRenderer implements GLSurfaceView.Renderer {
             mSurface.release();
         }
         if(mSurfaceTexture != null){
+            mSurfaceTexture.setOnFrameAvailableListener(null);
             mSurfaceTexture.release();
         }
         mSurface = null;
