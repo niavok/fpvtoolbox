@@ -389,6 +389,7 @@ public class FpvToolBox extends AppCompatActivity
     @Override
     protected void onPause() {
         Log.i(TAG, "on pause");
+        disableAll();
         mPanHandler.removeCallbacksAndMessages(null);
         mInactivityDetector.disable();
 
